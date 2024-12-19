@@ -1,0 +1,111 @@
+body
+{
+	margin: 0;
+	padding: 0;
+	background-image: url('D:\Login\Login\img\bgimg.jpg');	/* 背景图片 */
+	background-repeat: no-repeat;	/* 背景图片不重复 */
+}
+.video
+{
+    object-fit:cover;
+    /*被替换的内容在保持其宽高比的同时填充元素的整
+    个内容框。如果对象的宽高比与内容框不相匹配，
+    该对象将被剪裁以适应内容框。*/
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+}
+#audio{
+color: #fff;
+width: 50px;
+height: 20px;
+text-shadow: #e91e63 2px 2px 2px ;
+position: absolute;
+top: 8%;
+left: 92%;
+text-align: left;
+transform: translate(-50%,-50%);
+}
+#bigBox
+{   opacity:0.8;
+	margin: 0 auto;	/* login框剧中 */
+	margin-top: 200px; /* login框与顶部的距离 */
+	padding: 20px 50px;	/* login框内部的距离(内部与输入框和按钮的距离) */
+	background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);/* login框背景颜色和透明度 */
+	width: 400px;
+	height: 300px;
+	border-radius: 10px;	/* 圆角边 */
+	text-align: center;	/* 框内所有内容剧中 */
+}
+
+#bigBox h1
+{
+	color: white;	/* LOGIN字体颜色 */
+}
+
+#bigBox .inputBox
+{
+	margin-top: 50px;	/* 输入框顶部与LOGIN标题的间距 */
+}
+
+#bigBox .inputBox .inputText
+{
+	margin-top: 20px;	/* 输入框之间的距离 */
+}
+
+#bigBox .inputBox .inputText span
+{
+	color: black;	/* icon颜色 */
+}
+
+#bigBox .inputBox .inputText input
+{
+	border: 0;	/* 删除输入框边框 */
+	padding: 10px 10px;	/* 输入框内的间距 */
+	border-bottom: 1px solid white;	/* 输入框白色下划线 */
+	background-color: #00000000;	/* 输入框透明 */
+	color: white;	/* 输入字体的颜色 */
+}
+
+
+#bigBox .loginButton
+{   font-size:10px;
+	margin-top: 30px;	/* 按钮顶部与输入框的距离 */
+	width: 150px;
+	height: 25px;
+	color: white;	/* 按钮字体颜色 */
+	display:inline-block;
+    text-decoration:none;
+    background:linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+    line-height:25px;
+    text-align:center;
+    border-radius:50px;
+    background-size:400%;
+    z-index:1;
+}
+a:hover{
+    animation:sun 8s infinite;
+}
+a::before{
+content="";
+position:absolute;
+left:-5px;
+right:-5px;
+top:-5px;
+bottom:-5px;
+border-radius:50px;
+filter:blur(20px);
+background:linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+background-size:400%;
+z-index:-1;
+}
+@keyframes sun{
+    100%{
+        background-position:-400%, 0;
+    }
+}
+button{
+color
+}

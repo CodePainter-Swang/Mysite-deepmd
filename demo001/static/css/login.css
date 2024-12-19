@@ -1,0 +1,213 @@
+*{
+margin : 0;
+padding : 0;
+}
+@font-face {
+  font-family: logo;
+  src: url(../Baloo-Regular.ttf)
+}
+.logo_header .logo_name{
+font-family:logo;
+font-size: 35px;
+color:white;
+position:static;
+margin-left:5px;
+display: flex;
+align-items: center;
+justify-content: center;
+height: 100%;
+}
+.side .project_name{
+color:white;
+font-size:  23px;
+margin-top:10px;
+margin-bottom:45px;
+}
+.side .team{
+font-size:14px;
+color:grey;
+}
+.side .fe{
+margin-top:120px;
+color:grey;
+}
+.side .nav{
+color:white;
+font-family:logo;
+font-size:14px;
+letter-spacing:1px;
+margin-bottom:70px;
+}
+.side .logo_header{
+position:relative;
+height:70px;
+width:300px;
+display:flex;
+align-items:center;
+}
+.side .footer{
+margin-top:20px;
+}
+.side .footer a{
+text-decoration:none;
+}
+.side .footer a .left{
+font-family:logo;
+font-size:15px;
+color:white;
+}
+.side .footer a .right{
+font-family:logo;
+font-size:14px;
+color:white;
+float:right;
+margin-top: 55px;
+margin-right:7px;
+}
+
+body{
+background-image: url('../img/bg.jpg');
+
+}
+.main {
+position:relative;
+width:1000px;
+margin:70px auto;
+
+}
+.side {
+padding-top:75px;
+padding-left:65px;
+padding-right:65px;
+width:370px;
+background-image: linear-gradient(to top, #09203f 0%, #537895 100%);
+height:532px;
+
+}
+
+.login{
+position:absolute;
+right:0;
+top:0;
+width:350px;
+height:495px;
+background:white;
+padding:64px 75px 48px;
+}
+
+.login .register{
+float:right;
+}
+
+.login .header{
+margin-bottom:35px;
+}
+
+#loginbox a {
+text-decoration:none;
+}
+
+#loginbox .inputBox .inputText
+{
+	margin-top: 20px;	/* 输入框之间的距离 */
+}
+
+#loginbox .inputBox .inputText span
+{
+	color: black;	/* icon颜色 */
+}
+.side .footer .confont icon-arrow-circle-right{
+color:black;}
+
+#loginbox .loginButton
+{   font-size:10px;
+	margin-top: 30px ;	/* 按钮顶部与输入框的距离 */
+	margin-left:58px;
+	width: 200px;
+	height: 25px;
+	color: white;	/* 按钮字体颜色 */
+	display:inline-block;
+    text-decoration:none;
+    background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+    background-size: 400%;
+    line-height:25px;
+    text-align:center;
+    border-radius:50px;
+    z-index:1;
+}
+#loginbox .check input{
+margin-top:20px;
+margin-left:20px;
+}
+#loginbox .filed_center{
+width:320px;
+margin-top:20px;
+text-align:center;
+}
+#loginbox .wechat{
+position:relative;
+margin-top:45px;
+height:45px;
+padding:0 55px;
+}
+.address{
+position:absolute;
+right:80px;
+bottom:30px;
+font-size:13px;
+}
+#loginbox .wechat_1{
+position:absolute;
+top:8px;
+font-size:18px;
+color:black;
+padding-left:15px;
+height:100%;
+}
+#loginbox .rel{
+color:grey;
+margin-top:15px;
+}
+#loginbox .inputBox .inputText input
+{
+    width:75%;
+	border: 0;	/* 删除输入框边框 */
+	padding: 10px 10px;	/* 输入框内的间距 */
+	border-bottom: 1px solid #005980;	/* 输入框白色下划线 */
+	background-color: #00000000;	/* 输入框透明 */
+	color: black;	/* 输入字体的颜色 */
+}
+a:hover{
+    animation:sun 8s infinite;
+}
+.foot{
+width:600px;
+margin:0 auto;
+margin-top:45px;
+
+}
+.foot a{
+text-decoration:none;
+font-family:logo;
+color:grey;
+}
+.foot a:hover{
+color:pink;
+text-decoration:block;
+border-bottom:1px solid black;
+}
+.foot i {
+margin-right:15px;
+
+}
+
+@keyframes sun{
+    100%{
+        background-position:-400%, 0;
+    }
+}
+
+/* 只在悬停时添加动画效果 */
+#loginbox .loginButton:hover {
+    animation: sun 8s infinite;
+}

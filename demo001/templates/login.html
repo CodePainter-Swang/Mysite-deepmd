@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/iconfont.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/bootstrap.css' %}">
+    <script src="{% static 'js/jquery.3.1.1.js' %}"></script>
+    <script type="text/javascript">
+        var d1=document.getElementById('#side').innerHTML;
+
+        var d2=document.getElementById('#login').innerHTML;
+
+        document.getElementById('#login').innerHTML=d1;
+
+        document.getElementById('#side').innerHTML=d2;
+    </script>
+</head>
+<body>
+    <div class="main">
+        <div class="side" id="side">
+            <div class="logo_header">
+                 <img src="{% static 'img/MD.png' %}" height="70px;">
+                <span class="logo_name">AI for Science</span>
+            </div>
+            <div class="project_name">基于深度势能的分子动力学模拟平台</div>
+            <div class="nav">
+                 本平台基于深度学习的势能模型，通过神经网络学习分子间的相互作用，能够准确捕捉复杂分子间的相互作用，显著提升模拟的精度和速度。
+                 我们的平台都能帮助用户深入探索分子行为，旨在为研究人员提供高效、精准的分子模拟工具。
+            </div>
+            <div class="fe">—————————————————————</div>
+            <div class="footer">
+                <a href="#" target="_blank">
+                    <span class="right">AFS -- 校企版 </span>
+                    <span class="iconfont icon-arrow-circle-right"></span>
+                </a>
+            </div>
+
+
+        </div>
+
+        <div class="login" id="login">
+            <div class="header">
+                <h2 style="color: #005980;">登录</h2>
+                <span class="register" style="font-color:#005980;">
+                    没有账号？
+                    <a href="#" style="text-decoration:none;cursor: pointer;color: #005980;">点击注册</a>
+                </span>
+            </div>
+            <div id="loginbox">
+                <form action="" method="post" name="login" id="main">
+
+				    <div class="inputBox">
+
+					    <div class="inputText">
+							<span class="iconfont icon-nickname"></span>
+							<input type="text" placeholder="Username" name="username" form="main" required />
+					    </div>
+					    <div class="inputText">
+
+							<span class="iconfont icon-visible"></span>
+							<input type="password" placeholder="Password" name="password" form="main" required/>
+
+					    </div>
+				    </div>
+                    <div class="check">
+                        <input type="checkbox" />   记住密码
+                    </div>
+
+				    <a href="javascript:document.login.submit();" class="loginButton">login</a>
+
+			    </form>
+                <div class="filed_center">
+                    <a href="#">已有账号，忘记密码?</a>
+                </div>
+
+                <div class="wechat">
+                    <a href="#">
+                        <i>
+                            <img src="{% static 'img/wechat.png' %}" width="35px" height="35.2px">
+                        </i>
+                        <span class="wechat_1">使用微信扫码登录</span>
+                    </a>
+                </div>
+                <div class="rel">
+                    --------------------------------------------------
+                </div>
+
+            </div>
+            <span class="address">
+                中国·北京
+            </span>
+
+
+        </div>
+        <div class="foot">
+            <i><a href="#">©swang0001.com</a></i>
+            <i><a href="#">关于我们</a></i>
+            <i><a href="#">使用条款</a></i>
+            <i><a href="#">帮助文档</a></i>
+            <i><a href="#">联系电话-18186315086</a></i>
+        </div>
+
+    </div>
+
+
+
+</body>
+</html>
