@@ -1,0 +1,243 @@
+/* 配色需求rgb(5,57,106) rgb(23,94,154) rgb(55,136,203)*/
+@font-face {
+	font-family: logo;
+	src: url(../Baloo-Regular.ttf)
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+a {
+	text-decoration: none;
+}
+body{
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: url(../img/bg.jpg) fixed no-repeat center center;
+	background-size: cover;
+	letter-spacing: 2px;
+}
+.ui-container {
+	position: relative;
+	width: 60rem;
+	height: 40rem;
+	background-color: aqua;
+}
+.sidebox {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 50%;
+	background-image: linear-gradient(to top, #09203f 0%, #537895 100%);
+	padding-top: 75px;
+	padding-left: 65px;
+	padding-right: 65px;
+	box-sizing: border-box;
+}
+.logo_header {
+	position: relative;
+	height: 70px;
+	width: 300px;
+	display: flex;
+	align-items: center;
+}
+.logo_header .logo_name {
+	font-family: logo;
+	font-size: 35px;
+	color: white;
+	position: static;
+	margin-left: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+.project_name {
+	color: white;
+	font-size: 19px;
+	margin-top: 10px;
+	margin-bottom: 45px;
+}
+.nav {
+	color: white;
+	font-family: logo;
+	font-size: 14px;
+	letter-spacing: 1px;
+	margin-bottom: 70px;
+	width: 100%;
+	line-height: 1.6;
+	word-wrap: break-word;
+	white-space: normal;
+	box-sizing: border-box;
+	padding-right: 30px;
+	text-align: justify;
+}
+.fe {
+	margin-top: 120px;
+	color: grey;
+}
+.footer {
+	margin-top: 20px;
+}
+.footer a {
+	text-decoration: none;
+}
+.footer a .right {
+	font-family: logo;
+	font-size: 14px;
+	color: white;
+	float: right;
+	margin-top: 55px;
+	margin-right: 7px;
+}
+.box-infor,
+.introduce,
+.s,
+.box-footer {
+	display: none;
+}
+.box-infor {
+	position: relative;
+	margin: 1rem;
+	padding: 15px;
+	height: 37rem;
+	color: aliceblue;
+	letter-spacing: 2.5px;
+}
+.box-footer {
+	position: absolute;
+	/* width: 90%; */
+	margin-top: 50px;
+	bottom: 0;
+	border-top: 1px solid whitesmoke;
+	font-size: .8rem;
+	color: aliceblue;
+}
+.box-footer a{
+	display: block;
+	margin-top: 15px;
+	color: #F5F5F5;
+}
+.sidebox img {
+	vertical-align: middle;
+}
+.pannel {
+	position: absolute;
+	display: flex;
+	width: 50%;
+	margin: 0 0 0 0;
+	padding-top: 10px;
+	padding-bottom: 1px;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	justify-content: center;
+	background-color: white;
+}
+.content {
+	position: relative;
+	width: 80%;
+	padding-top: 15px;
+}
+.title {
+	color: rgb(5,57,106);
+}
+.switch {
+	position: absolute;
+	right: 0;
+	font-size: .8rem;
+}
+/* 表单界面信息框特效 */
+form {
+	position: relative;
+	margin-top: 3rem;
+	width: 100%;
+}
+form .input{
+	position: relative;
+	width: 100%;
+	margin:2rem 0 0;
+}
+.input input{
+	outline: none;
+	width:100%;
+	border:none;
+	border-bottom: 0.1rem solid rgb(20, 118, 154);
+	font-size: 1rem;
+}
+.input::after{
+	content:attr(placeholder); /* ????—————————— */
+	position:absolute;
+	left: 0;
+	top: -10%;
+	font-size: 1rem;
+	color: rgb(23,94,154);
+}
+.input.focus::after{
+	top:-80%;
+	font-size:.8rem;
+}
+.case {
+	margin-top: 30px;
+}
+.case label {
+	color: black;
+}
+form span{
+	display: block;
+	color: rgb(73, 202, 82);
+	font-size: 0.8rem;
+	cursor:pointer;
+}
+form button {
+	border: none;
+	outline: none;
+	margin-top: 4rem;
+	margin-left: 6.5rem;
+	width: 10rem;
+	height: 3.5rem;
+	border-radius: 3rem;
+	background: linear-gradient(90deg,rgb(5,57,106),rgb(55,136,203));
+	box-shadow: 0 0 8px rgb(55,136,203);
+	cursor: pointer;
+	color: white;
+}
+
+/* footer */
+.signup-footer {
+	margin-top: 20px;
+	text-align: center;
+}
+.footer-item a{
+	color: #000000;
+	font-weight: 400;
+	margin-left: 20px;
+}
+.foot {
+	width: 800px;
+	margin: 0 auto;
+	margin-top: 15px;
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	text-align: center;
+}
+
+.foot a {
+	text-decoration: none;
+	font-family: logo;
+	color: grey;
+}
+
+.foot a:hover {
+	color: pink;
+	text-decoration: block;
+	border-bottom: 1px solid black;
+}
+
+.foot i {
+	margin-right: 15px;
+}

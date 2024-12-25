@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <link rel="stylesheet" href="{% static 'css/iconfont.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/bootstrap/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-4.6.2/bootstrap.css' %}">
     <script src="{% static 'js/jquery.3.1.1.js' %}"></script>
     <script type="text/javascript">
         var d1=document.getElementById('#side').innerHTML;
@@ -47,11 +47,12 @@
                 <h2 style="color: #005980;">登录</h2>
                 <span class="register" style="font-color:#005980;">
                     没有账号？
-                    <a href="#" style="text-decoration:none;cursor: pointer;color: #005980;">点击注册</a>
+                    <a href="/singup/" style="text-decoration:none;cursor: pointer;color: #005980;">点击注册</a>
                 </span>
             </div>
             <div id="loginbox">
-                <form action="" method="post" name="login" id="main">
+                <form action="/login/" method="post" name="login" id="main">
+                    {% csrf_token %}
 
 				    <div class="inputBox">
 
@@ -62,7 +63,7 @@
 					    <div class="inputText">
 
 							<span class="iconfont icon-visible"></span>
-							<input type="password" placeholder="Password" name="password" form="main" required/>
+							<input type="password" placeholder="{% if error_message %}{{ error_message }}{% else %}Password{% endif %}" name="password" form="main" required/>
 
 					    </div>
 				    </div>

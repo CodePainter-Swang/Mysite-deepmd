@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<!-- 禁止进行页面的缩放 -->
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+		<title>注册界面</title>
+		<link rel="stylesheet" type="text/css" href="{% static 'css/signup.css' %}"/>
+
+	</head>
+	<body>
+		<div class="container">
+			<div class="ui-container" id="p1">
+				<div class="sidebox">
+					<div class="logo_header">
+						<img src="{% static 'img/MD.png' %}" height="70px">
+						<span class="logo_name" style="white-space: nowrap;">AI for Science</span>
+					</div>
+					<div class="project_name">基于深度势能的分子动力学模拟平台</div>
+					<div class="nav">
+						本平台基于深度学习的势能模型，通过神经网络学习分子间的相互作用，能够准确捕捉复杂分子间的相互作用，显著提升模拟的精度和速度。我们的平台都能帮助用户深入探索分子行为，旨在为研究人员提供高效、精准的分子模拟工具。
+					</div>
+					<div class="fe">—————————————————————</div>
+					<div class="footer">
+						<a href="#" target="_blank">
+							<span class="right">AFS -- 校企版 </span>
+							<span class="iconfont icon-arrow-circle-right"></span>
+						</a>
+					</div>
+				</div>
+				<div class="pannel" id="p2">
+					<div class="content">
+						<div class="title"><h1>注册</h1></div>
+						<div class="switch">
+							<span id="have-account">已有帐号？ </span><a href="/login/">点击登录</a>
+						</div>
+						<form action="">
+							<div class="input" placeholder="用户名"><input type="text"></div>
+							<div id="email" class="input" placeholder="邮箱"><input type="text"></div>
+							<div class="input" placeholder="密码不少于6位"><input type="password"></div>
+							<div id="repeat" class="input" placeholder="确认密码"><input type="password"></div>
+							<div>
+							<span class="case">
+								<input type="checkbox" name="accept_term" id="accept_term" value="" />
+								<label for="">我已经阅读并同意  <a href="">使用协议</a></label>
+							</span>
+							</div>
+							<button>注册</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="foot">
+				<i><a href="#">©swang0001.com</a></i>
+				<i><a href="#">关于我们</a></i>
+				<i><a href="#">使用条款</a></i>
+				<i><a href="#">帮助文档</a></i>
+				<i><a href="#">联系电话-18186315086</a></i>
+			</div>
+		</div>
+	</body>
+	<script src="{% static 'js/jquery.3.1.1.js' %}"></script>
+	<script type="text/javascript">
+		$('.input input').on('focus',function(){
+			$(this).parent().addClass('focus');
+		})
+		$('.input input').on('blur',function(){
+			// $(this).parent().removeClass('focus');
+			if ($(this).val()=='')
+				$(this)
+					.parent()
+					.removeClass('focus')
+		})
+
+
+	</script>
+</html>
