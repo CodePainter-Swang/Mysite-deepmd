@@ -51,7 +51,7 @@
                 </span>
             </div>
             <div id="loginbox">
-                <form action="/login/" method="post" name="login" id="main">
+                <form action="{% url 'demo001:login' %}" method="post" name="login" id="main">
                     {% csrf_token %}
 
 				    <div class="inputBox">

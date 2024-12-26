@@ -33,20 +33,25 @@
 					<div class="content">
 						<div class="title"><h1>注册</h1></div>
 						<div class="switch">
-							<span id="have-account">已有帐号？ </span><a href="/login/">点击登录</a>
+							<span id="have-account">已有帐号？ </span><a href="{% url 'demo001:login' %}">点击登录</a>
 						</div>
-						<form action="">
-							<div class="input" placeholder="用户名"><input type="text"></div>
-							<div id="email" class="input" placeholder="邮箱"><input type="text"></div>
-							<div class="input" placeholder="密码不少于6位"><input type="password"></div>
-							<div id="repeat" class="input" placeholder="确认密码"><input type="password"></div>
+						<form action="/singup/" method="post" onsubmit="return validateForm()">
+							{% csrf_token %}
+							<div class="input" placeholder="用户名"><input type="text" name="username" id="username"></div>
+							<div class="input" placeholder="密码不少于6位"><input type="password" name="password" id="password" onkeyup="checkPassword()"></div>
+							<div id="repeat" class="input" placeholder="确认密码"><input type="password" name="confirm_password" id="confirm_password" onkeyup="checkPassword()"></div>
+							<div id="password_message" style="color: red; font-size: 12px; margin-top: 5px;"></div>
+							<div id="email" class="input" placeholder="邮箱"><input type="text" name="email" id="email_input" onkeyup="checkEmail()"></div>
+							<div id="email_message" style="color: red; font-size: 12px; margin-top: 5px;"></div>
+							<div class="input" placeholder="电话号码"><input type="text" name="phone" id="phone" onkeyup="checkPhone()"></div>
+							<div id="phone_message" style="color: red; font-size: 12px; margin-top: 5px;"></div>
 							<div>
 							<span class="case">
 								<input type="checkbox" name="accept_term" id="accept_term" value="" />
 								<label for="">我已经阅读并同意  <a href="">使用协议</a></label>
 							</span>
 							</div>
-							<button>注册</button>
+							<button type="submit">注册</button>
 						</form>
 					</div>
 				</div>
@@ -73,6 +78,79 @@
 					.removeClass('focus')
 		})
 
+		function checkPassword() {
+			var password = document.getElementById("password").value;
+			var confirm_password = document.getElementById("confirm_password").value;
+			var message = document.getElementById("password_message");
+			
+			if(password.length < 6) {
+				message.innerHTML = "密码长度不能少于6位";
+				return false;
+			}
+			else if(password != confirm_password) {
+				message.innerHTML = "两次输入的密码不一致";
+				return false;
+			}
+			else {
+				message.innerHTML = "";
+				return true;
+			}
+		}
+
+		function checkEmail() {
+			var email = document.getElementById("email_input").value;
+			var message = document.getElementById("email_message");
+			var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			
+			if (!emailPattern.test(email)) {
+				message.innerHTML = "请输入有效的邮箱地址";
+				return false;
+			} else {
+				message.innerHTML = "";
+				return true;
+			}
+		}
+
+		function checkPhone() {
+			var phone = document.getElementById("phone").value;
+			var message = document.getElementById("phone_message");
+			var phonePattern = /^1[3456789]\d{9}$/;
+			
+			if (!phonePattern.test(phone)) {
+				message.innerHTML = "请输入有效的手机号码";
+				return false;
+			} else {
+				message.innerHTML = "";
+				return true;
+			}
+		}
+
+		function validateForm() {
+			var username = document.getElementById("username").value;
+			var accept_term = document.getElementById("accept_term").checked;
+			
+			if (!username) {
+				alert("请输入用户名");
+				return false;
+			}
+			if (!checkPassword()) {
+				alert("请检查密码设置");
+				return false;
+			}
+			if (!checkEmail()) {
+				alert("请输入有效的邮箱地址");
+				return false;
+			}
+			if (!checkPhone()) {
+				alert("请输入有效的手机号码");
+				return false;
+			}
+			if (!accept_term) {
+				alert("请阅读并同意使用协议");
+				return false;
+			}
+			return true;
+		}
 
 	</script>
 </html>

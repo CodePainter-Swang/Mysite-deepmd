@@ -183,7 +183,7 @@ a:hover{
 .foot{
 width:600px;
 margin:0 auto;
-margin-top:45px;
+margin-top:15px;
 
 }
 .foot a{
@@ -198,7 +198,6 @@ border-bottom:1px solid black;
 }
 .foot i {
 margin-right:15px;
-
 }
 
 @keyframes sun{

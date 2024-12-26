@@ -4,4 +4,5 @@ from django.db import models
 class UserInfo(models.Model):
     username = models.CharField(max_length=32)
     password = models.CharField(max_length=32)
-    age = models.IntegerField()
+    email = models.CharField(max_length=32, default='')
+    phone = models.CharField(max_length=32, default='')

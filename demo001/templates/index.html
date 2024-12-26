@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepMD系统</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{% static 'img/MD.png' %}" alt="MD Logo" class="nav-logo">
+                <h1>AI for Science</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">首页</a></li>
+                <li><a href="/upload">数据上传</a></li>
+                <li><a href="/analysis">分子模拟</a></li>
+                <li><a href="/results">后管系统</a></li>
+            </ul>
+            <div class="user-info">
+                <span class="username">{{ request.session.username }}</span>
+                <a href="{% url 'demo001:login' %}" class="logout-btn">退出</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>欢迎使用DeepMD系统</h2>
+            <p>基于深度势能的分子动力学模拟平台</p>
+        </section>
+
+        <section class="features">
+            <a href="/upload" class="feature-card-link">
+                <div class="feature-card">
+                    <h3>数据上传</h3>
+                    <p>支持多种格式的数据文件上传和处理</p>
+                </div>
+            </a>
+            <a href="/analysis" class="feature-card-link">
+                <div class="feature-card">
+                    <h3>分子模拟</h3>
+                    <p>强大的分析工具，快速获取结果</p>
+                </div>
+            </a>
+            <a href="/results" class="feature-card-link">
+                <div class="feature-card">
+                    <h3>可视化展示</h3>
+                    <p>直观的数据可视化和结果展示</p>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 DeepMD系统 版权所有</p>
+    </footer>
+</body>
+</html> 
