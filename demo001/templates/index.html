@@ -16,14 +16,20 @@
                 <h1>AI for Science</h1>
             </div>
             <ul class="nav-links">
-                <li><a href="/">首页</a></li>
+                <li><a href="{% url 'demo001:index' %}">首页</a></li>
                 <li><a href="/upload">数据上传</a></li>
                 <li><a href="/analysis">分子模拟</a></li>
-                <li><a href="/results">后管系统</a></li>
+                <li class="dropdown">
+                    <a href="/results">后管系统</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/profile">个人中心</a></li>
+                        <li><a href="/users">用户列表</a></li>
+                    </ul>
+                </li>
             </ul>
             <div class="user-info">
                 <span class="username">{{ request.session.username }}</span>
-                <a href="{% url 'demo001:login' %}" class="logout-btn">退出</a>
+                <a href="{% url 'demo001:logout' %}" class="logout-btn">退出</a>
             </div>
         </nav>
     </header>

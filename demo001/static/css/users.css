@@ -1,0 +1,149 @@
+.users-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.users-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    margin-bottom: 5rem;
+}
+
+.users-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.users-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* 搜索框样式 */
+.search-section {
+    margin-bottom: 2rem;
+}
+
+.search-box {
+    position: relative;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    outline: none;
+}
+
+/* 表格样式 */
+.table {
+    margin-bottom: 2rem;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* 操作按钮样式 */
+.actions {
+    white-space: nowrap;
+}
+
+.actions .btn {
+    padding: 0.375rem 0.75rem;
+    margin: 0 0.25rem;
+}
+
+.btn-info {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.btn-info:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+/* 分页样式 */
+.pagination-section {
+    margin-top: 2rem;
+}
+
+.pagination .page-link {
+    color: #3498db;
+    border: 1px solid #dee2e6;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f9fa;
+    color: #2980b9;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .users-card {
+        padding: 1.5rem;
+    }
+
+    .table-responsive {
+        margin: 0 -1.5rem;
+    }
+
+    .actions .btn {
+        padding: 0.25rem 0.5rem;
+    }
+} 
