@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据上传 - DeepMD系统</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/upload.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{% static 'img/MD.png' %}" alt="MD Logo" class="nav-logo">
+                <h1>AI for Science</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'demo001:index' %}">首页</a></li>
+                <li><a href="/upload">数据上传</a></li>
+                <li><a href="/analysis">分子模拟</a></li>
+                <li class="dropdown">
+                    <a href="#">后管系统</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/profile">个人中心</a></li>
+                        <li><a href="/users">用户列表</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="user-info">
+                <span class="username">{{ request.session.username }}</span>
+                <a href="{% url 'demo001:logout' %}" class="logout-btn">退出</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="upload-container">
+        <div class="upload-card">
+            <div class="upload-header">
+                <h2>数据上传</h2>
+                <p class="text-muted">请选择要上传的文件</p>
+            </div>
+
+            <div class="upload-form">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <div class="custom-file-upload">
+                        <input type="file" id="file" name="file" class="file-input" required>
+                        <label for="file">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span class="file-label">选择文件</span>
+                        </label>
+                    </div>
+                    <div id="file-name" class="mt-2 text-center"></div>
+                    <button type="submit" class="btn btn-primary upload-btn">
+                        <i class="fas fa-upload"></i> 上传文件
+                    </button>
+                </form>
+            </div>
+
+            {% if message %}
+            <div class="alert {% if success %}alert-success{% else %}alert-danger{% endif %} mt-3">
+                {{ message }}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 DeepMD系统 版权所有</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('file').addEventListener('change', function(e) {
+            var fileName = e.target.files[0] ? e.target.files[0].name : '未选择文件';
+            document.getElementById('file-name').textContent = fileName;
+            document.querySelector('.file-label').textContent = '重新选择文件';
+        });
+    </script>
+</body>
+</html> 

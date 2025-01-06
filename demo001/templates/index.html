@@ -17,7 +17,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="{% url 'demo001:index' %}">首页</a></li>
-                <li><a href="/upload">数据上传</a></li>
+                <li><a href="{% url 'demo001:upload_file' %}">数据上传</a></li>
                 <li><a href="/analysis">分子模拟</a></li>
                 <li class="dropdown">
                     <a href="/results">后管系统</a>
@@ -41,7 +41,7 @@
         </section>
 
         <section class="features">
-            <a href="/upload" class="feature-card-link">
+            <a href="{% url 'demo001:upload_file' %}" class="feature-card-link">
                 <div class="feature-card">
                     <h3>数据上传</h3>
                     <p>支持多种格式的数据文件上传和处理</p>

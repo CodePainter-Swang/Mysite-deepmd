@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+import os
+from django.conf import settings
 
 # Create your views here.
 
@@ -170,3 +172,39 @@ def delete_user(request):
                 'message': '用户不存在'
             })
     return JsonResponse({'status': 'error', 'message': '无效的请求方法'})
+
+@login_required
+def upload_file(request):
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            return render(request, 'upload.html', {
+                'message': '请选择要上传的文件',
+                'success': False
+            })
+        
+        uploaded_file = request.FILES['file']
+        
+        # 确保目标目录存在
+        upload_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps'
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # 构建文件保存路径
+        file_path = os.path.join(upload_dir, uploaded_file.name)
+        
+        try:
+            # 保存文件
+            with open(file_path, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+            
+            return render(request, 'upload.html', {
+                'message': '文件上传成功！',
+                'success': True
+            })
+        except Exception as e:
+            return render(request, 'upload.html', {
+                'message': f'文件上传失败：{str(e)}',
+                'success': False
+            })
+    
+    return render(request, 'upload.html')

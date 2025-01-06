@@ -86,7 +86,7 @@ DATABASES = {
         'NAME': 'deepmd',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '10.158.13.178',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
