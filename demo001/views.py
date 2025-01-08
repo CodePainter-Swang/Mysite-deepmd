@@ -226,9 +226,73 @@ def upload_file(request):
     
     return render(request, 'upload.html')
 
+def get_system_files():
+    """获取分子系统数据集文件列表"""
+    md_sys_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys'
+    system_files = []
+    
+    try:
+        for file in os.listdir(md_sys_path):
+            if file.endswith('.lmp'):
+                # 将文件名中的空格替换为下划线
+                safe_name = file.replace(' ', '_')
+                if safe_name != file:
+                    # 如果文件名包含空格，重命名文件
+                    old_path = os.path.join(md_sys_path, file)
+                    new_path = os.path.join(md_sys_path, safe_name)
+                    os.rename(old_path, new_path)
+                    file = safe_name
+                
+                system_files.append({
+                    'value': file,
+                    'name': file
+                })
+    except Exception as e:
+        system_files = [{'value': 'water.lmp', 'name': 'water.lmp'}]
+    
+    return system_files
+
 @login_required
 def analysis(request):
-    return render(request, 'analysis.html')
+    # 获取分子系统类型（目录名）
+    model_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model'
+    system_types = []
+    
+    try:
+        for item in os.listdir(model_path):
+            if os.path.isdir(os.path.join(model_path, item)):
+                system_types.append({
+                    'value': item,
+                    'name': item
+                })
+    except Exception as e:
+        system_types = []
+    
+    context = {
+        'system_types': system_types,
+        'system_files': get_system_files()  # 使用辅助函数获取系统文件列表
+    }
+    return render(request, 'analysis.html', context)
+
+@login_required
+def get_deepmd_models(request):
+    """获取指定系统类型下的深度势能模型列表"""
+    system_type = request.GET.get('system_type')
+    models = []
+    
+    if system_type:
+        model_dir = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}'
+        try:
+            for file in os.listdir(model_dir):
+                if file.endswith('.pb'):
+                    models.append({
+                        'value': file,
+                        'name': file
+                    })
+        except Exception as e:
+            pass
+    
+    return JsonResponse({'models': models})
 
 @login_required
 def start_simulation(request):
@@ -238,10 +302,46 @@ def start_simulation(request):
             output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
             os.makedirs(output_dir, exist_ok=True)
             
-            # 生成LAMMPS输入文件
-            input_content = generate_lammps_input(request.POST)
-            input_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/in.lammps'
+            # 获取所有的质量配置
+            masses = request.POST.getlist('mass[]')
             
+            # 构建质量配置字符串
+            mass_config = '\n'.join(f'mass            {i+1} {mass}' 
+                                  for i, mass in enumerate(masses))
+            
+            # 获取选择的系统类型和模型
+            system_type = request.POST.get('system_type')
+            model = request.POST.get('deepmd_model')
+            model_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}/{model}'
+            
+            # 生成LAMMPS输入文件
+            input_content = f"""# Molecular dynamics simulation
+
+units           {request.POST.get('units', 'metal')}
+boundary        {request.POST.get('boundary', 'p p p')}
+atom_style      atomic
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check no
+
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+{mass_config}
+
+pair_style      deepmd  {model_path}
+pair_coeff      * *
+
+velocity        all create {request.POST.get('temperature', '330.0')} 23456789
+
+fix             1 all nvt temp {request.POST.get('temperature', '330.0')} {request.POST.get('temperature', '330.0')} 0.5
+timestep        {request.POST.get('timestep', '0.0005')}
+thermo_style    custom step pe ke etotal temp press vol
+thermo          {request.POST.get('thermo', '100')}
+dump            1 all custom {request.POST.get('dump', '100')} {output_dir}/dump/water.dump id type x y z
+
+run             {request.POST.get('runsteps', '1000')}
+"""
+            # 保存输入文件
+            input_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/in.lammps'
             with open(input_file, 'w') as f:
                 f.write(input_content)
             
@@ -254,7 +354,7 @@ def start_simulation(request):
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
-                cwd='/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps'  # 设置工作目录
+                cwd='/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps'
             )
             
             # 存储进程信息
@@ -337,7 +437,7 @@ read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/wa
 mass            1 16
 mass            2 2
 
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water.pb
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water/water.pb
 pair_coeff      * *
 
 velocity        all create {form_data.get('temperature', '330.0')} 23456789
@@ -346,7 +446,7 @@ fix             1 all nvt temp {form_data.get('temperature', '330.0')} {form_dat
 timestep        {form_data.get('timestep', '0.0005')}
 thermo_style    custom step pe ke etotal temp press vol
 thermo          {form_data.get('thermo', '100')}
-dump            1 all custom {form_data.get('dump', '100')} {output_dir}/water.dump id type x y z
+dump            1 all custom {form_data.get('dump', '100')} {output_dir}/dump/water.dump id type x y z
 
 run             {form_data.get('runsteps', '1000')}
 """

@@ -44,47 +44,107 @@
                 <form id="simulationForm" method="POST">
                     {% csrf_token %}
                     
+                    <!-- 第一行：分子系统数据集 -->
                     <div class="form-group">
-                        <label for="units">单位制</label>
-                        <select class="form-control" id="units" name="units">
-                            <option value="metal" selected>metal</option>
-                            <option value="real">real</option>
-                            <option value="lj">lj</option>
+                        <label for="system">分子系统数据集</label>
+                        <select class="form-control" id="system" name="system">
+                            {% for system in system_files %}
+                                <option value="{{ system.value }}">{{ system.name }}</option>
+                            {% endfor %}
                         </select>
+                        <small class="form-text text-muted">选择要进行模拟的分子系统</small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="boundary">边界条件</label>
-                        <select class="form-control" id="boundary" name="boundary">
-                            <option value="p p p" selected>周期性边界 (p p p)</option>
-                            <option value="f f f">固定边界 (f f f)</option>
-                            <option value="p p f">混合边界 (p p f)</option>
-                        </select>
+                    <!-- 在分子系统数据集和原子质量配置之间添加 -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="system_type">分子系统类型</label>
+                            <select class="form-control" id="system_type" name="system_type">
+                                {% for type in system_types %}
+                                    <option value="{{ type.value }}">{{ type.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">选择分子系统类型</small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="deepmd_model">深度势能模型</label>
+                            <select class="form-control" id="deepmd_model" name="deepmd_model" disabled>
+                                <option value="">请先选择分子系统类型</option>
+                            </select>
+                            <small class="form-text text-muted">选择对应的深度势能模型</small>
+                        </div>
                     </div>
 
+                    <!-- 第二行：原子质量配置 -->
                     <div class="form-group">
-                        <label for="temperature">温度 (K)</label>
-                        <input type="number" class="form-control" id="temperature" name="temperature" value="330.0">
+                        <label>原子质量配置</label>
+                        <div class="mass-config" id="massConfigContainer">
+                            <div class="input-group mb-2 mass-row">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Type</span>
+                                    <span class="input-group-text type-number">1</span>
+                                </div>
+                                <input type="number" class="form-control" name="mass[]" value="16" step="0.1" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">amu</span>
+                                    <button type="button" class="btn btn-outline-danger remove-mass" style="display: none;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addMassBtn">
+                            <i class="fas fa-plus"></i> 添加原子类型
+                        </button>
+                        <small class="form-text text-muted">配置不同类型原子的质量</small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="timestep">时间步长 (ps)</label>
-                        <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
+                    <!-- 基本参数设置 -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="units">单位制</label>
+                            <select class="form-control" id="units" name="units">
+                                <option value="metal" selected>metal</option>
+                                <option value="real">real</option>
+                                <option value="lj">lj</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="boundary">边界条件</label>
+                            <select class="form-control" id="boundary" name="boundary">
+                                <option value="p p p" selected>周期性边界 (p p p)</option>
+                                <option value="f f f">固定边界 (f f f)</option>
+                                <option value="p p f">混合边界 (p p f)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="runsteps">模拟步数</label>
-                        <input type="number" class="form-control" id="runsteps" name="runsteps" value="1000">
+                    <!-- 温度和时间步长设置 -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="temperature">温度 (K)</label>
+                            <input type="number" class="form-control" id="temperature" name="temperature" value="330.0">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="timestep">时间步长 (ps)</label>
+                            <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="thermo">热力学信息输出频率</label>
-                        <input type="number" class="form-control" id="thermo" name="thermo" value="100">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dump">轨迹输出频率</label>
-                        <input type="number" class="form-control" id="dump" name="dump" value="100">
+                    <!-- 输出设置 -->
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="runsteps">模拟步数</label>
+                            <input type="number" class="form-control" id="runsteps" name="runsteps" value="1000">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="thermo">热力学信息输出频率</label>
+                            <input type="number" class="form-control" id="thermo" name="thermo" value="100">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="dump">轨迹输出频率</label>
+                            <input type="number" class="form-control" id="dump" name="dump" value="100">
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="startSimulation">开始模拟</button>
@@ -178,27 +238,71 @@
                 if (simulationRunning) return;
 
                 simulationRunning = true;
+                const progressBar = $('.progress-bar');
+                
+                // 清空并显示输出区域
                 $('#simulationOutput').show();
-                // 清空所有输出区域
-                $('.setup-output').empty();
-                $('.progress-output').empty();
-                $('.performance-output').empty();
-                $('.progress-bar').css('width', '0%');
+                $('.setup-output, .progress-output, .performance-output').empty();
                 $('#startSimulation').prop('disabled', true);
+                
+                // 重置进度条状态
+                progressBar
+                    .stop(true)
+                    .removeClass('completed')
+                    .css({
+                        'transition': 'none',
+                        'width': '0'
+                    });
+                
+                // 强制重绘
+                progressBar[0].offsetHeight;
+                
+                // 启用动画并开始进度更新
+                let progress = 0;
+                let lastProgress = 0;
+                
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        // 使用更平缓的非线性增长
+                        const remaining = 90 - progress;
+                        
+                        // 根据剩余距离动态调整增量
+                        let increment;
+                        if (progress < 60) {
+                            // 前60%进度相对较快
+                            increment = 0.2;
+                        } else if (progress < 80) {
+                            // 60-80%进度开始减慢
+                            increment = 0.15;
+                        } else {
+                            // 80-90%进度非常缓慢
+                            increment = Math.max(0.05, remaining * 0.01);
+                        }
+                        
+                        progress = Math.min(90, progress + increment);
+                        
+                        // 确保进度只增不减
+                        if (progress > lastProgress) {
+                            lastProgress = progress;
+                            progressBar.css('width', `${progress}%`);
+                        }
+                    }
+                }, 80);  // 增加间隔，使动画更平滑
 
+                // 发送请求
                 $.ajax({
                     url: '{% url "demo001:start_simulation" %}',
                     type: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {
                         if (response.status === 'started') {
-                            pollSimulationOutput();
+                            pollSimulationOutput(progressInterval);
                         } else {
-                            showError('启动模拟失败：' + response.message);
+                            handleError('启动模拟失败：' + response.message);
                         }
                     },
                     error: function() {
-                        showError('服务器错误，请稍后重试');
+                        handleError('服务器错误，请稍后重试');
                     }
                 });
             });
@@ -413,23 +517,30 @@
                 let timingHtml = '';
                 timingData.forEach(item => {
                     if (item.section === 'header') {
-                        // 只显示包含 'Section |' 的表头，跳过 'MPI task timing breakdown:'
                         if (item.content.includes('Section |')) {
-                            timingHtml += `<tr><th colspan="6" class="text-center">${item.content}</th></tr>`;
+                            timingHtml += `
+                                <tr class="header-row">
+                                    <th>Section</th>
+                                    <th>Min Time</th>
+                                    <th>Avg Time</th>
+                                    <th>Max Time</th>
+                                    <th>%VAR</th>
+                                    <th>%Total</th>
+                                </tr>`;
                         }
                     }
                     else if (item.section === 'separator') {
-                        timingHtml += `<tr><td colspan="6" class="separator">${item.content}</td></tr>`;
+                        return;
                     }
                     else if (item.section === 'data') {
                         timingHtml += `
                             <tr>
-                                <td><span class="performance-label">${item.name}</span></td>
-                                <td class="text-right"><span class="performance-value">${item.min}</span></td>
-                                <td class="text-right"><span class="performance-value">${item.avg}</span></td>
-                                <td class="text-right"><span class="performance-value">${item.max}</span></td>
-                                <td class="text-right"><span class="performance-value">${item.varavg}</span></td>
-                                <td class="text-right"><span class="performance-value">${item.total}</span></td>
+                                <td>${item.name}</td>
+                                <td><span class="performance-value">${item.min}</span></td>
+                                <td><span class="performance-value">${item.avg}</span></td>
+                                <td><span class="performance-value">${item.max}</span></td>
+                                <td><span class="performance-value">${item.varavg}</span></td>
+                                <td><span class="performance-value">${item.total}</span></td>
                             </tr>
                         `;
                     }
@@ -440,23 +551,31 @@
                 $('.progress-bar').css('width', response.progress + '%');
             }
 
-            function pollSimulationOutput() {
+            function pollSimulationOutput(progressInterval) {
                 outputUpdateInterval = setInterval(function() {
                     $.ajax({
                         url: '{% url "demo001:get_simulation_output" %}',
                         type: 'GET',
                         success: function(response) {
-                            if (response.status === 'running') {
-                                updateOutput(response);
-                            } else if (response.status === 'completed') {
-                                updateOutput(response);
-                                simulationCompleted();
-                            } else if (response.status === 'error') {
-                                showError('模拟过程出错：' + response.message);
+                            updateOutput(response);
+                            
+                            if (response.status === 'completed') {
+                                // 清除进度动画
+                                clearInterval(progressInterval);
+                                
+                                // 完成时的优雅过渡
+                                $('.progress-bar')
+                                    .css({
+                                        'transition': 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        'width': '100%'
+                                    })
+                                    .addClass('completed');
+                                
                                 simulationCompleted();
                             }
                         },
                         error: function() {
+                            clearInterval(progressInterval);
                             showError('获取模拟输出失败');
                             simulationCompleted();
                         }
@@ -474,6 +593,106 @@
                 $('.setup-output').append('\nError: ' + message);
                 simulationCompleted();
             }
+
+            function handleError(message) {
+                clearInterval(outputUpdateInterval);
+                showError(message);
+                $('.progress-bar')
+                    .stop(true)
+                    .removeClass('completed')
+                    .css({
+                        'transition': 'width 0.3s ease',
+                        'width': '0'
+                    });
+                $('#startSimulation').prop('disabled', false);
+                simulationRunning = false;
+            }
+
+            const massContainer = $('#massConfigContainer');
+            const addMassBtn = $('#addMassBtn');
+            
+            // 添加新的原子类型
+            addMassBtn.click(function() {
+                const currentCount = massContainer.children('.mass-row').length;
+                const newRow = $(`
+                    <div class="input-group mb-2 mass-row">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Type</span>
+                            <span class="input-group-text type-number">${currentCount + 1}</span>
+                        </div>
+                        <input type="number" class="form-control" name="mass[]" value="1.0" step="0.1" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">amu</span>
+                            <button type="button" class="btn btn-outline-danger remove-mass">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).hide().fadeIn(300);
+                
+                massContainer.append(newRow);
+                updateRemoveButtons();
+            });
+            
+            // 删除原子类型
+            massContainer.on('click', '.remove-mass', function() {
+                const row = $(this).closest('.mass-row');
+                row.fadeOut(300, function() {
+                    row.remove();
+                    updateTypeNumbers();
+                    updateRemoveButtons();
+                });
+            });
+            
+            // 更新类型编号
+            function updateTypeNumbers() {
+                massContainer.find('.type-number').each(function(index) {
+                    $(this).text(index + 1);
+                });
+            }
+            
+            // 更新删除按钮显示
+            function updateRemoveButtons() {
+                const rows = massContainer.children('.mass-row');
+                if (rows.length > 1) {
+                    $('.remove-mass').show();
+                } else {
+                    $('.remove-mass').hide();
+                }
+            }
+
+            // 当分子系统类型改变时更新深度势能模型选项
+            $('#system_type').change(function() {
+                const systemType = $(this).val();
+                const modelSelect = $('#deepmd_model');
+                
+                if (systemType) {
+                    // 发送AJAX请求获取对应的模型列表
+                    $.ajax({
+                        url: '{% url "demo001:get_deepmd_models" %}',
+                        data: { system_type: systemType },
+                        success: function(response) {
+                            modelSelect.empty().prop('disabled', false);
+                            response.models.forEach(function(model) {
+                                modelSelect.append(
+                                    $('<option></option>')
+                                        .val(model.value)
+                                        .text(model.name)
+                                );
+                            });
+                        },
+                        error: function() {
+                            modelSelect.empty()
+                                .prop('disabled', true)
+                                .append('<option value="">加载模型失败</option>');
+                        }
+                    });
+                } else {
+                    modelSelect.empty()
+                        .prop('disabled', true)
+                        .append('<option value="">请先选择分子系统类型</option>');
+                }
+            });
         });
     </script>
 </body>

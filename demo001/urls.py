@@ -16,4 +16,5 @@ urlpatterns = [
     path('analysis/', views.analysis, name='analysis'),
     path('start_simulation/', views.start_simulation, name='start_simulation'),
     path('get_simulation_output/', views.get_simulation_output, name='get_simulation_output'),
+    path('get_deepmd_models/', views.get_deepmd_models, name='get_deepmd_models'),
 ]

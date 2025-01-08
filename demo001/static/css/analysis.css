@@ -9,13 +9,19 @@
 }
 
 .card-header {
-    background-color: #2c3e50;
-    color: white;
+    background: linear-gradient(90deg, #1e293b, #334155);  /* 更深的渐变背景 */
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .card-header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    font-family: "Times New Roman", Times, serif;
+    color: #ffffff;  /* 确保文字为白色 */
 }
 
 pre {
@@ -26,12 +32,49 @@ pre {
 }
 
 .progress {
-    height: 6px;
+    height: 3px;
+    background: #f3f4f6;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 1.2rem 0;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .progress-bar {
-    background-color: #2c3e50;
-    transition: width 0.3s ease;
+    height: 100%;
+    background: linear-gradient(90deg, #64748b, #475569);  /* 优雅的灰色渐变 */
+    border-radius: 2px;
+    position: relative;
+    transition: none;  /* 初始时禁用过渡 */
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255, 0) 0%,
+        rgba(255,255,255, 0.1) 50%,
+        rgba(255,255,255, 0) 100%
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite ease-out;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.progress-bar.completed {
+    background: linear-gradient(90deg, #475569, #334155);  /* 深灰色渐变 */
+    transition: width 0.5s ease-out, background 0.3s ease;
 }
 
 .btn-primary {
@@ -78,20 +121,21 @@ pre {
 .progress-table {
     font-size: 0.9rem;
     width: 100%;
+    font-family: "Times New Roman", Times, serif;
 }
 
+/* 表格所有单元格居中对齐 */
 .progress-table th, 
 .progress-table td {
-    text-align: right !important;  /* 所有列右对齐 */
+    text-align: center !important;  /* 强制居中对齐 */
     padding: 0.5rem !important;
-    font-family: monospace;
+    font-family: "Times New Roman", Times, serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.progress-table th:first-child, 
-.progress-table td:first-child {
-    text-align: right !important;  /* Step列也右对齐 */
-}
-
+/* 表头样式 */
 .progress-table thead {
     background: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
@@ -100,11 +144,31 @@ pre {
 .progress-table th {
     font-weight: 600;
     color: #2c3e50;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.5rem !important;
+    vertical-align: middle;
 }
 
+/* 表格数据行样式 */
+.progress-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.progress-table tbody td {
+    font-size: 0.9rem;
+    padding: 0.5rem !important;
+    vertical-align: middle;
+}
+
+/* 悬停效果 */
 .progress-table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
+}
+
+/* 确保表格容器不溢出 */
+.progress-table-container {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .performance-section {
@@ -120,18 +184,19 @@ pre {
 
 .performance-top-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 40% 60%;  /* 4:6 比例 */
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .performance-card {
-    background: #f8f9fa;
+    background: #ffffff;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .performance-card.full-width {
@@ -146,13 +211,11 @@ pre {
 }
 
 .performance-card h6 {
-    color: #2c3e50;
-    margin-bottom: 1.2rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    font-size: 1rem;
-    text-align: center;
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .performance-basic, 
@@ -164,165 +227,132 @@ pre {
 
 .performance-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    font-size: 0.9rem;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-.performance-table th[colspan] {
-    background: #f8f9fa;
-    color: #2c3e50;
+.performance-table .header-row th {
+    font-family: "Times New Roman", Times, serif;
+    padding: 0.8rem 0.4rem;
+    background: #f8fafc;
+    color: #475569;
     font-weight: 600;
-    padding: 1rem !important;
-    border-bottom: 2px solid #dee2e6;
-    font-family: monospace;
     font-size: 0.95rem;
-    letter-spacing: 0.5px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.performance-table .separator {
-    background: #f8f9fa;
-    color: #6c757d;
-    font-family: monospace;
-    padding: 0.3rem !important;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.performance-table tr:not(.separator) td {
-    padding: 0.8rem 1rem !important;
+.performance-table td {
+    font-family: "Times New Roman", Times, serif;
+    padding: 0.8rem 0.4rem;
+    color: #334155;
+    font-size: 0.95rem;
+    text-align: center;
     vertical-align: middle;
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    transition: background-color 0.2s;
+}
+
+.performance-table td:first-child,
+.performance-table .header-row th:first-child {
+    padding-left: 0.4rem;  /* 统一内边距 */
+    text-align: center;    /* 居中对齐 */
+}
+
+.performance-table .performance-value {
+    font-family: "Times New Roman", Times, serif;
+    min-width: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 0 auto;
+    padding: 0.4rem 0.8rem;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.performance-table tr:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.2s ease;
 }
 
 .performance-table tr:last-child td {
     border-bottom: none;
 }
 
-.performance-table td:first-child {
-    font-weight: 500;
-    color: #2c3e50;
-    padding-left: 1.5rem !important;
-}
-
-.performance-table td:not(:first-child) {
-    text-align: right;
-    padding-right: 1.5rem !important;
-}
-
-.performance-table .performance-value {
-    display: inline-block;
-    min-width: 80px;
-    padding: 0.3rem 0.8rem;
-    background: #f8f9fa;
-    border-radius: 4px;
-    font-family: 'Consolas', monospace;
-    font-size: 0.9rem;
-    color: #2c3e50;
-    font-weight: 500;
-}
-
-.performance-table tr:not(.separator):hover {
-    background-color: rgba(44, 62, 80, 0.02);
-}
-
-.performance-card .table-responsive {
-    margin: 0;
-    padding: 0.5rem;
-    background: white;
-    border-radius: 8px;
-}
-
-.performance-table td,
-.performance-table th {
-    width: auto;
-}
-
-.performance-table td:first-child {
-    width: 20%;
-}
-
-.performance-table td:not(:first-child) {
-    width: 16%;
-}
-
 .performance-card.full-width {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.performance-card.full-width h6 {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 1.5rem;
+    padding: 2rem;
 }
 
 .performance-card.full-width .table-responsive {
+    margin: 0;
+    padding: 0;
     width: 100%;
-    max-width: 1200px;
 }
 
 .performance-info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    flex-grow: 1;
+    display: grid;
+    gap: 0.3rem;
 }
 
 .performance-info-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.8rem;
+    align-items: center;
 }
 
 .performance-info-item {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(90px, 1fr) auto;  /* 标签占更多空间 */
+    gap: 0.4rem;
     align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem;
-    background: rgba(44, 62, 80, 0.02);
-    border-radius: 6px;
-    transition: background-color 0.2s;
+    padding: 0.25rem 0.5rem;
+    background: #f8fafc;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
 .info-section-title {
-    color: #2c3e50;
-    font-size: 0.95rem;
-    font-weight: 600;
-    padding: 0.5rem 0;
-    margin-top: 0.5rem;
-    border-top: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0.4rem 0 0.2rem;
+    padding-top: 0.3rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.info-section-title:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
 }
 
 .performance-label {
-    color: #666;
-    font-size: 0.9rem;
-    font-weight: 500;
+    color: #64748b;
+    font-size: 0.85rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .performance-value {
-    color: #2c3e50;
-    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.85rem;
     text-align: right;
-    font-family: monospace;
-    background: white;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    background: #fff;
+    border-radius: 3px;
+    min-width: 60px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    min-width: 100px;
+    transition: all 0.2s ease;
 }
 
 /* 悬停效果 */
 .performance-info-item:hover {
-    background: rgba(44, 62, 80, 0.05);
+    background: #f1f5f9;
+    transform: translateX(2px);
 }
 
 /* 确保值的对齐 */
@@ -339,4 +369,383 @@ pre {
     .performance-top-row {
         grid-template-columns: 1fr;
     }
+} 
+
+/* 通用字体设置 */
+.performance-card,
+.performance-info-item,
+.performance-table,
+.progress-table,
+.setup-output,
+.performance-output {
+    font-family: "Times New Roman", Times, serif;
+}
+
+/* 表格数据字体 */
+.progress-table th, 
+.progress-table td {
+    font-family: "Times New Roman", Times, serif !important;
+    text-align: right;
+    padding: 0.5rem;
+}
+
+/* 性能指标数值样式 */
+.performance-value {
+    font-family: "Times New Roman", Times, serif !important;
+    color: #1e293b;
+    font-weight: 600;
+    text-align: right;
+    background: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    min-width: 100px;
+}
+
+/* 标签文本样式 */
+.performance-label {
+    font-family: "Times New Roman", Times, serif;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* MPI任务时间分析表格样式 */
+.performance-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* 所有表头和单元格居中对齐 */
+.performance-table .header-row th,
+.performance-table td {
+    text-align: center;
+    padding: 0.8rem 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 移除之前的左对齐设置 */
+.performance-table td:first-child,
+.performance-table .header-row th:first-child {
+    padding-left: 0.4rem;  /* 统一内边距 */
+    text-align: center;    /* 居中对齐 */
+}
+
+/* 列宽设置 */
+.performance-table th:first-child,
+.performance-table td:first-child {
+    width: 18%;
+}
+
+.performance-table th:not(:first-child),
+.performance-table td:not(:first-child) {
+    width: 16.4%;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+    .performance-info-row {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .performance-info-item {
+        grid-template-columns: minmax(100px, auto) minmax(80px, auto);
+    }
+}
+
+@media (max-width: 768px) {
+    .performance-info-row {
+        grid-template-columns: 1fr;
+    }
+} 
+
+/* MPI任务时间分析卡片标题样式 */
+.performance-card.full-width h6 {
+    font-family: "Times New Roman", Times, serif;
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;  /* 调整上下间距 */
+    padding: 0 0 0.8rem 0; /* 调整内边距 */
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;      /* 左对齐 */
+    letter-spacing: 0.5px; /* 字间距 */
+}
+
+/* MPI任务时间分析卡片内容区域 */
+.performance-card.full-width .table-responsive {
+    margin: 0;
+    padding: 0.5rem 0;     /* 增加表格上下间距 */
+    width: 100%;
+}
+
+/* 表格顶部间距 */
+.performance-table {
+    margin-top: 0.5rem;    /* 增加表格与标题的间距 */
+}
+
+/* 卡片内边距 */
+.performance-card.full-width {
+    padding: 1.8rem 2rem;  /* 调整卡片内边距 */
+}
+
+/* 表头和单元格内边距优化 */
+.performance-table .header-row th,
+.performance-table td {
+    padding: 0.8rem 0.6rem;  /* 减小水平内边距 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 表格单元格内容样式 */
+.performance-table .performance-value {
+    min-width: 60px;      /* 减小最小宽度 */
+    padding: 0.4rem 0.6rem; /* 减小内边距 */
+    margin: 0 2px;        /* 添加少量外边距 */
+}
+
+/* 确保表格不会溢出容器 */
+.performance-card.full-width .table-responsive {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: auto;
+} 
+
+/* 基本性能指标卡片样式优化 */
+.performance-card.basic-info {
+    padding: 1rem;  /* 减小卡片内边距 */
+    min-width: 0;   /* 防止内容溢出 */
+}
+
+/* 基本性能指标卡片标题 */
+.performance-card.basic-info h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* 基本性能指标网格布局 */
+.performance-card.basic-info .performance-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;  /* 减小项目间距 */
+}
+
+/* 基本性能指标项目样式 */
+.performance-card.basic-info .performance-info-item {
+    grid-template-columns: minmax(85px, auto) minmax(65px, auto);  /* 调整列宽比例 */
+    gap: 0.4rem;  /* 减小标签和数值之间的间距 */
+    padding: 0.4rem 0.6rem;  /* 减小内边距 */
+    border-radius: 4px;
+}
+
+/* 基本性能指标标签样式 */
+.performance-card.basic-info .performance-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    padding-left: 0.2rem;
+}
+
+/* 基本性能指标数值样式 */
+.performance-card.basic-info .performance-value {
+    font-size: 0.85rem;
+    min-width: 65px;
+    padding: 0.3rem 0.5rem;
+    text-align: right;
+    background: #f8fafc;
+}
+
+/* 基本性能指标行布局 */
+.performance-card.basic-info .performance-info-row {
+    display: grid;
+    grid-template-columns: 1fr;  /* 单列布局 */
+    gap: 0.4rem;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 1200px) {
+    .performance-card.basic-info {
+        padding: 0.8rem;
+    }
+    
+    .performance-card.basic-info .performance-info-item {
+        grid-template-columns: minmax(80px, auto) minmax(60px, auto);
+    }
+} 
+
+/* 卡片悬停效果 */
+.performance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 卡片内容悬停效果 */
+.performance-card:hover h6 {
+    color: #3b82f6;
+    transition: color 0.3s ease;
+}
+
+/* 添加卡片边框光效 */
+.performance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+/* 悬停时显示边框光效 */
+.performance-card:hover::before {
+    transform: translateX(100%);
+}
+
+/* 信息项悬停效果 */
+.performance-info-item {
+    display: grid;
+    grid-template-columns: minmax(90px, 1fr) auto;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: #f8fafc;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.performance-info-item:hover {
+    background: #f1f5f9;
+    transform: translateX(2px);
+}
+
+/* 数值悬停效果 */
+.performance-value {
+    color: #1e293b;
+    font-size: 0.85rem;
+    text-align: right;
+    padding: 0.2rem 0.5rem;
+    background: #fff;
+    border-radius: 3px;
+    min-width: 60px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.performance-info-item:hover .performance-value {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    color: #3b82f6;
+}
+
+/* MPI任务时间分析表格行悬停效果 */
+.performance-table tr {
+    transition: all 0.2s ease;
+}
+
+.performance-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.performance-table tr:hover td {
+    color: #3b82f6;
+}
+
+/* 表格数值悬停效果 */
+.performance-table .performance-value {
+    transition: all 0.2s ease;
+}
+
+.performance-table tr:hover .performance-value {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+} 
+
+/* 页脚样式优化 */
+footer {
+    margin-top: 1rem;  /* 减小顶部边距 */
+    padding: 0.5rem 0;  /* 减小上下内边距 */
+    border-top: 1px solid #e2e8f0;  /* 添加顶部分隔线 */
+}
+
+/* 版权文本样式 */
+footer p {
+    margin: 0;  /* 移除默认外边距 */
+    font-size: 0.8rem;  /* 减小字体大小 */
+    color: #64748b;  /* 使用较浅的颜色 */
+    text-align: center;
+    line-height: 1;  /* 减小行高 */
+} 
+
+/* 原子质量配置样式 */
+.mass-config {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.mass-config .input-group {
+    max-width: 400px;
+    transition: all 0.3s ease;
+}
+
+.mass-config .input-group:hover {
+    transform: translateX(4px);
+}
+
+.mass-config .input-group-text {
+    background: #fff;
+    border-color: #e2e8f0;
+    color: #64748b;
+    font-size: 0.9rem;
+    min-width: 45px;
+    justify-content: center;
+}
+
+.type-number {
+    font-weight: 500;
+    color: #3b82f6;
+}
+
+.mass-config .form-control {
+    border-color: #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.mass-config .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.remove-mass {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.remove-mass:hover {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+#addMassBtn {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+    transition: all 0.2s ease;
+}
+
+#addMassBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 } 
