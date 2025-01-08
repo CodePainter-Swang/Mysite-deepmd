@@ -1,0 +1,67 @@
+LAMMPS (29 Sep 2021)
+# Molecular dynamics simulation
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check no
+
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+Reading data file ...
+  triclinic box = (0.0000000 0.0000000 0.0000000) to (12.444700 12.444700 12.444700) with tilt (0.0000000 0.0000000 0.0000000)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  192 atoms
+  read_data CPU = 0.001 seconds
+mass            1 16
+mass            2 2
+
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water.pb
+pair_coeff      * *
+
+velocity        all create 330.0 23456789
+
+fix             1 all nvt temp 330.0 330.0 0.5
+timestep        0.0005
+thermo_style    custom step pe ke etotal temp press vol
+thermo          100
+dump            1 all custom 100 ./output/water.dump id type x y z
+
+run             1000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- USER-DEEPMD package:
+
+@article{Wang_ComputPhysCommun_2018_v228_p178,
+  author = {Wang, Han and Zhang, Linfeng and Han, Jiequn and E, Weinan},
+  doi = {10.1016/j.cpc.2018.03.016},
+  url = {https://doi.org/10.1016/j.cpc.2018.03.016},
+  year = 2018,
+  month = {jul},
+  publisher = {Elsevier {BV}},
+  volume = 228,
+  journal = {Comput. Phys. Commun.},
+  title = {{DeePMD-kit: A deep learning package for many-body potential energy representation and molecular dynamics}},
+  pages = {178--184}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update every 10 steps, delay 0 steps, check no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 8
+  ghost atom cutoff = 8
+  binsize = 4, bins = 4 4 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair deepmd, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+ERROR on proc 0: Cannot open dump file (../dump.cpp:601)

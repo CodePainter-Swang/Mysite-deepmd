@@ -7,6 +7,13 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 import os
 from django.conf import settings
+import subprocess
+import threading
+import re
+
+# 添加全局变量用于存储模拟进程和输出
+simulation_processes = {}
+simulation_outputs = {}
 
 # Create your views here.
 
@@ -56,6 +63,16 @@ def index(request):
     return render(request, 'index.html')
 
 def logout(request):
+    # 清理用户的模拟进程
+    user_id = request.session.get('user_id')
+    if user_id in simulation_processes:
+        process = simulation_processes[user_id]
+        if process.poll() is None:  # 如果进程还在运行
+            process.terminate()  # 终止进程
+        del simulation_processes[user_id]
+    if user_id in simulation_outputs:
+        del simulation_outputs[user_id]
+    
     request.session.flush()
     return redirect('demo001:login')
 
@@ -208,3 +225,203 @@ def upload_file(request):
             })
     
     return render(request, 'upload.html')
+
+@login_required
+def analysis(request):
+    return render(request, 'analysis.html')
+
+@login_required
+def start_simulation(request):
+    if request.method == 'POST':
+        try:
+            # 确保输出目录存在
+            output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # 生成LAMMPS输入文件
+            input_content = generate_lammps_input(request.POST)
+            input_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/in.lammps'
+            
+            with open(input_file, 'w') as f:
+                f.write(input_content)
+            
+            # 启动LAMMPS进程
+            lmp_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/lmp'
+            process = subprocess.Popen(
+                [lmp_path, '-in', input_file],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                universal_newlines=True,
+                cwd='/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps'  # 设置工作目录
+            )
+            
+            # 存储进程信息
+            user_id = request.session['user_id']
+            simulation_processes[user_id] = process
+            simulation_outputs[user_id] = {
+                'output': '',
+                'progress': 0,
+                'total_steps': int(request.POST.get('runsteps', 1000))
+            }
+            
+            # 启动输出监控线程
+            threading.Thread(
+                target=monitor_simulation_output,
+                args=(user_id,),
+                daemon=True
+            ).start()
+            
+            return JsonResponse({'status': 'started'})
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({'status': 'error', 'message': '无效的请求方法'})
+
+@login_required
+def get_simulation_output(request):
+    user_id = request.session['user_id']
+    
+    if user_id not in simulation_outputs:
+        return JsonResponse({
+            'status': 'error',
+            'message': '没有运行中的模拟'
+        })
+    
+    sim_data = simulation_outputs[user_id]
+    process = simulation_processes.get(user_id)
+    
+    # 格式化输出数据
+    formatted_output = {
+        'setup': sim_data['output']['setup'],
+        'progress': sim_data['output']['progress'],
+        'performance': sim_data['output']['performance']
+    }
+    
+    if process is None or process.poll() is not None:
+        # 进程已结束
+        if user_id in simulation_processes:
+            del simulation_processes[user_id]
+        return JsonResponse({
+            'status': 'completed',
+            'output': formatted_output,
+            'progress': 100
+        })
+    
+    return JsonResponse({
+        'status': 'running',
+        'output': formatted_output,
+        'progress': sim_data['progress']
+    })
+
+def generate_lammps_input(form_data):
+    """根据表单数据生成LAMMPS输入文件内容"""
+    # 定义输出目录
+    output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
+    
+    template = f"""# Molecular dynamics simulation
+
+units           {form_data.get('units', 'metal')}
+boundary        {form_data.get('boundary', 'p p p')}
+atom_style      atomic
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check no
+
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+mass            1 16
+mass            2 2
+
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water.pb
+pair_coeff      * *
+
+velocity        all create {form_data.get('temperature', '330.0')} 23456789
+
+fix             1 all nvt temp {form_data.get('temperature', '330.0')} {form_data.get('temperature', '330.0')} 0.5
+timestep        {form_data.get('timestep', '0.0005')}
+thermo_style    custom step pe ke etotal temp press vol
+thermo          {form_data.get('thermo', '100')}
+dump            1 all custom {form_data.get('dump', '100')} {output_dir}/water.dump id type x y z
+
+run             {form_data.get('runsteps', '1000')}
+"""
+    return template
+
+def monitor_simulation_output(user_id):
+    """监控模拟进程的输出"""
+    process = simulation_processes[user_id]
+    sim_data = simulation_outputs[user_id]
+    total_steps = sim_data['total_steps']
+    
+    # 初始化输出结构
+    sim_data['output'] = {
+        'setup': [],      # 设置信息
+        'progress': [],   # 进度信息
+        'performance': [] # 性能信息
+    }
+    
+    # 定义不同类型信息的模式
+    patterns = {
+        'setup': [
+            'Setting up',
+            'Unit style',
+            'Current step',
+            'Time step',
+            'Per MPI rank memory allocation'
+        ],
+        'progress': [
+            'Step PotEng',
+            r'^\s+\d+\s+[-\d.]+'  # 匹配数据行
+        ],
+        'performance': [
+            'Loop time of',
+            'Performance:',
+            r'^\d+\.\d+% CPU',    # CPU使用率
+            'MPI task timing breakdown:',
+            r'Section\s+\|',      # 表头
+            r'Pair\s+\|',         # 各项性能指标
+            r'Neigh\s+\|',
+            r'Comm\s+\|',
+            r'Output\s+\|',
+            r'Modify\s+\|',
+            r'Other\s+\|',
+            'Total # of neighbors',
+            'Ave neighs/atom',
+            'Neighbor list builds',
+            'Total wall time:'
+        ]
+    }
+    
+    while True:
+        line = process.stdout.readline()
+        if not line and process.poll() is not None:
+            break
+        
+        # 分类处理不同类型的输出信息
+        for output_type, pattern_list in patterns.items():
+            if any(re.search(pattern, line) for pattern in pattern_list):
+                sim_data['output'][output_type].append(line.strip())
+                break
+        
+        # 更新进度
+        if 'Step' in line:
+            try:
+                current_step = int(re.search(r'Step\s+(\d+)', line).group(1))
+                sim_data['progress'] = min(100, int(current_step * 100 / total_steps))
+            except:
+                pass
+    
+    # 处理剩余输出
+    remaining_output = process.stdout.read()
+    if remaining_output:
+        for line in remaining_output.splitlines():
+            for output_type, pattern_list in patterns.items():
+                if any(re.search(pattern, line) for pattern in pattern_list):
+                    sim_data['output'][output_type].append(line.strip())
+                    break
+

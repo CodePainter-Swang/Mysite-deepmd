@@ -13,4 +13,7 @@ urlpatterns = [
     path('reset_user_password/', views.reset_user_password, name='reset_user_password'),
     path('delete_user/', views.delete_user, name='delete_user'),
     path('upload/', views.upload_file, name='upload_file'),
+    path('analysis/', views.analysis, name='analysis'),
+    path('start_simulation/', views.start_simulation, name='start_simulation'),
+    path('get_simulation_output/', views.get_simulation_output, name='get_simulation_output'),
 ]

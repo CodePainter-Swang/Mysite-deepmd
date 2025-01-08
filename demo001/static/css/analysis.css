@@ -1,0 +1,342 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+pre {
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.progress {
+    height: 6px;
+}
+
+.progress-bar {
+    background-color: #2c3e50;
+    transition: width 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+}
+
+.btn-primary:hover {
+    background-color: #34495e;
+    border-color: #34495e;
+}
+
+.output-sections {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.output-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.output-section h5 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.setup-output, .performance-output {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.progress-table {
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.progress-table th, 
+.progress-table td {
+    text-align: right !important;  /* 所有列右对齐 */
+    padding: 0.5rem !important;
+    font-family: monospace;
+}
+
+.progress-table th:first-child, 
+.progress-table td:first-child {
+    text-align: right !important;  /* Step列也右对齐 */
+}
+
+.progress-table thead {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.progress-table th {
+    font-weight: 600;
+    color: #2c3e50;
+    white-space: nowrap;
+}
+
+.progress-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.performance-section {
+    background: #fff;
+}
+
+.performance-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.performance-top-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.performance-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.performance-card.full-width {
+    width: 100%;
+}
+
+.performance-card .table-responsive {
+    margin: -0.5rem -1rem;
+    padding: 0.5rem 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.performance-card h6 {
+    color: #2c3e50;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.performance-basic, 
+.performance-neighbors {
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.performance-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.performance-table th[colspan] {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 1rem !important;
+    border-bottom: 2px solid #dee2e6;
+    font-family: monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.performance-table .separator {
+    background: #f8f9fa;
+    color: #6c757d;
+    font-family: monospace;
+    padding: 0.3rem !important;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.performance-table tr:not(.separator) td {
+    padding: 0.8rem 1rem !important;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: background-color 0.2s;
+}
+
+.performance-table tr:last-child td {
+    border-bottom: none;
+}
+
+.performance-table td:first-child {
+    font-weight: 500;
+    color: #2c3e50;
+    padding-left: 1.5rem !important;
+}
+
+.performance-table td:not(:first-child) {
+    text-align: right;
+    padding-right: 1.5rem !important;
+}
+
+.performance-table .performance-value {
+    display: inline-block;
+    min-width: 80px;
+    padding: 0.3rem 0.8rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.performance-table tr:not(.separator):hover {
+    background-color: rgba(44, 62, 80, 0.02);
+}
+
+.performance-card .table-responsive {
+    margin: 0;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 8px;
+}
+
+.performance-table td,
+.performance-table th {
+    width: auto;
+}
+
+.performance-table td:first-child {
+    width: 20%;
+}
+
+.performance-table td:not(:first-child) {
+    width: 16%;
+}
+
+.performance-card.full-width {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.performance-card.full-width h6 {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.performance-card.full-width .table-responsive {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.performance-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.performance-info-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.performance-info-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(44, 62, 80, 0.02);
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.info-section-title {
+    color: #2c3e50;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.performance-label {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.performance-value {
+    color: #2c3e50;
+    font-weight: 600;
+    text-align: right;
+    font-family: monospace;
+    background: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    min-width: 100px;
+}
+
+/* 悬停效果 */
+.performance-info-item:hover {
+    background: rgba(44, 62, 80, 0.05);
+}
+
+/* 确保值的对齐 */
+.performance-info-item .performance-value {
+    justify-self: end;
+}
+
+.performance-info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+/* 响应式调整 */
+@media (max-width: 992px) {
+    .performance-top-row {
+        grid-template-columns: 1fr;
+    }
+} 

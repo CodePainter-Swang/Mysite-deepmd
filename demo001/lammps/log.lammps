@@ -1,0 +1,99 @@
+LAMMPS (29 Sep 2021)
+# Molecular dynamics simulation
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+neighbor        2.0 bin
+neigh_modify    every 10 delay 0 check no
+
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+Reading data file ...
+  triclinic box = (0.0000000 0.0000000 0.0000000) to (12.444700 12.444700 12.444700) with tilt (0.0000000 0.0000000 0.0000000)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  192 atoms
+  read_data CPU = 0.001 seconds
+mass            1 16
+mass            2 2
+
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water.pb
+pair_coeff      * *
+
+velocity        all create 330.0 23456789
+
+fix             1 all nvt temp 330.0 330.0 0.5
+timestep        0.0005
+thermo_style    custom step pe ke etotal temp press vol
+thermo          100
+dump            1 all custom 100 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/water.dump id type x y z
+
+run             100
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- USER-DEEPMD package:
+
+@article{Wang_ComputPhysCommun_2018_v228_p178,
+  author = {Wang, Han and Zhang, Linfeng and Han, Jiequn and E, Weinan},
+  doi = {10.1016/j.cpc.2018.03.016},
+  url = {https://doi.org/10.1016/j.cpc.2018.03.016},
+  year = 2018,
+  month = {jul},
+  publisher = {Elsevier {BV}},
+  volume = 228,
+  journal = {Comput. Phys. Commun.},
+  title = {{DeePMD-kit: A deep learning package for many-body potential energy representation and molecular dynamics}},
+  pages = {178--184}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Neighbor list info ...
+  update every 10 steps, delay 0 steps, check no
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 8
+  ghost atom cutoff = 8
+  binsize = 4, bins = 4 4 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair deepmd, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.908 | 3.908 | 3.908 Mbytes
+Step PotEng KinEng TotEng Temp Press Volume 
+       0   -29941.641    8.1472669   -29933.494          330    7112.9818    1927.3176 
+     100   -29941.636    8.1491936   -29933.487    330.07804   -3927.3507    1927.3176 
+Loop time of 4.29729 on 1 procs for 100 steps with 192 atoms
+
+Performance: 1.005 ns/day, 23.874 hours/ns, 23.270 timesteps/s
+900.4% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 4.2674     | 4.2674     | 4.2674     |   0.0 | 99.30
+Neigh   | 0.023      | 0.023      | 0.023      |   0.0 |  0.54
+Comm    | 0.0035492  | 0.0035492  | 0.0035492  |   0.0 |  0.08
+Output  | 0.00064072 | 0.00064072 | 0.00064072 |   0.0 |  0.01
+Modify  | 0.0020004  | 0.0020004  | 0.0020004  |   0.0 |  0.05
+Other   |            | 0.0007121  |            |       |  0.02
+
+Nlocal:        192.000 ave         192 max         192 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:        2105.00 ave        2105 max        2105 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         0.00000 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:      40798.0 ave       40798 max       40798 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 40798
+Ave neighs/atom = 212.48958
+Neighbor list builds = 10
+Dangerous builds not checked
+Total wall time: 0:00:05

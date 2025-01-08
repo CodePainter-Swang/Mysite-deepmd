@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分子模拟 - DeepMD系统</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/analysis.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{% static 'img/MD.png' %}" alt="MD Logo" class="nav-logo">
+                <h1>AI for Science</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'demo001:index' %}">首页</a></li>
+                <li><a href="{% url 'demo001:upload_file' %}">数据上传</a></li>
+                <li><a href="{% url 'demo001:analysis' %}">分子模拟</a></li>
+                <li class="dropdown">
+                    <a href="#">后管系统</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/profile">个人中心</a></li>
+                        <li><a href="/users">用户列表</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="user-info">
+                <span class="username">{{ request.session.username }}</span>
+                <a href="{% url 'demo001:logout' %}" class="logout-btn">退出</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>分子动力学模拟配置</h2>
+            </div>
+            <div class="card-body">
+                <form id="simulationForm" method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="units">单位制</label>
+                        <select class="form-control" id="units" name="units">
+                            <option value="metal" selected>metal</option>
+                            <option value="real">real</option>
+                            <option value="lj">lj</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="boundary">边界条件</label>
+                        <select class="form-control" id="boundary" name="boundary">
+                            <option value="p p p" selected>周期性边界 (p p p)</option>
+                            <option value="f f f">固定边界 (f f f)</option>
+                            <option value="p p f">混合边界 (p p f)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="temperature">温度 (K)</label>
+                        <input type="number" class="form-control" id="temperature" name="temperature" value="330.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timestep">时间步长 (ps)</label>
+                        <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="runsteps">模拟步数</label>
+                        <input type="number" class="form-control" id="runsteps" name="runsteps" value="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thermo">热力学信息输出频率</label>
+                        <input type="number" class="form-control" id="thermo" name="thermo" value="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dump">轨迹输出频率</label>
+                        <input type="number" class="form-control" id="dump" name="dump" value="100">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="startSimulation">开始模拟</button>
+                </form>
+
+                <div id="simulationOutput" class="mt-4" style="display: none;">
+                    <h4>模拟输出</h4>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="output-sections">
+                        <!-- 设置信息 -->
+                        <div class="output-section">
+                            <h5>模拟设置</h5>
+                            <pre class="setup-output"></pre>
+                        </div>
+                        
+                        <!-- 模拟进度 -->
+                        <div class="output-section">
+                            <h5>模拟进度</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover progress-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Step</th>
+                                            <th>PotEng</th>
+                                            <th>KinEng</th>
+                                            <th>TotEng</th>
+                                            <th>Temp</th>
+                                            <th>Press</th>
+                                            <th>Volume</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="progress-output">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 性能信息 -->
+                        <div class="output-section performance-section">
+                            <h5>性能统计</h5>
+                            <div class="performance-grid">
+                                <!-- 上方两列布局 -->
+                                <div class="performance-top-row">
+                                    <!-- 基本性能指标 -->
+                                    <div class="performance-card">
+                                        <h6>基本性能指标</h6>
+                                        <div class="performance-basic"></div>
+                                    </div>
+                                    
+                                    <!-- 邻居列表统计 -->
+                                    <div class="performance-card">
+                                        <h6>系统统计信息</h6>
+                                        <div class="performance-neighbors"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 下方完整宽度的MPI分析 -->
+                                <div class="performance-card full-width">
+                                    <h6>MPI任务时间分析</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover performance-table">
+                                            <tbody class="performance-timing">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-4">
+        <p class="text-center">&copy; 2024 DeepMD系统 版权所有</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let simulationRunning = false;
+            let outputUpdateInterval;
+
+            $('#simulationForm').on('submit', function(e) {
+                e.preventDefault();
+                if (simulationRunning) return;
+
+                simulationRunning = true;
+                $('#simulationOutput').show();
+                // 清空所有输出区域
+                $('.setup-output').empty();
+                $('.progress-output').empty();
+                $('.performance-output').empty();
+                $('.progress-bar').css('width', '0%');
+                $('#startSimulation').prop('disabled', true);
+
+                $.ajax({
+                    url: '{% url "demo001:start_simulation" %}',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.status === 'started') {
+                            pollSimulationOutput();
+                        } else {
+                            showError('启动模拟失败：' + response.message);
+                        }
+                    },
+                    error: function() {
+                        showError('服务器错误，请稍后重试');
+                    }
+                });
+            });
+
+            function formatPerformanceInfo(label, value) {
+                return `
+                    <div class="performance-info-item">
+                        <span class="performance-label">${label}</span>
+                        <span class="performance-value">${value}</span>
+                    </div>
+                `;
+            }
+
+            function updateOutput(response) {
+                // 更新设置信息
+                $('.setup-output').html(response.output.setup.join('\n'));
+                
+                // 更新进度表格
+                let progressHtml = '';
+                response.output.progress.forEach(line => {
+                    if (line.includes('Step')) return; // 跳过表头
+                    const values = line.trim().split(/\s+/);
+                    if (values.length >= 7) {
+                        progressHtml += `
+                            <tr>
+                                <td>${values[0]}</td>
+                                <td>${parseFloat(values[1]).toFixed(3)}</td>
+                                <td>${parseFloat(values[2]).toFixed(3)}</td>
+                                <td>${parseFloat(values[3]).toFixed(3)}</td>
+                                <td>${parseFloat(values[4]).toFixed(3)}</td>
+                                <td>${parseFloat(values[5]).toFixed(3)}</td>
+                                <td>${parseFloat(values[6]).toFixed(3)}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                $('.progress-output').html(progressHtml);
+                
+                // 更新性能信息
+                const perfLines = response.output.performance;
+                let basicPerf = [];
+                let timingData = [];
+                let neighborStats = [];
+                
+                perfLines.forEach(line => {
+                    if (line.includes('Loop time of')) {
+                        const match = line.match(/Loop time of ([\d.]+) on (\d+) procs for (\d+) steps with (\d+) atoms/);
+                        if (match) {
+                            basicPerf.push({
+                                label: '循环时间',
+                                value: `${match[1]} s`
+                            });
+                            neighborStats.push({
+                                label: '处理器数量',
+                                value: `${match[2]}`
+                            });
+                            neighborStats.push({
+                                label: '模拟步数',
+                                value: `${match[3]} steps`
+                            });
+                            neighborStats.push({
+                                label: '原子数量',
+                                value: `${match[4]} atoms`
+                            });
+                        }
+                    }
+                    else if (line.includes('Performance:')) {
+                        const parts = line.match(/Performance: ([\d.]+) ns\/day, ([\d.]+) hours\/ns, ([\d.]+) timesteps\/s/);
+                        if (parts) {
+                            basicPerf.push({
+                                label: '模拟速度',
+                                value: `${parts[1]} ns/day`
+                            });
+                            basicPerf.push({
+                                label: '计算时间',
+                                value: `${parts[2]} hours/ns`
+                            });
+                            basicPerf.push({
+                                label: '时间步速率',
+                                value: `${parts[3]} steps/s`
+                            });
+                        }
+                    }
+                    else if (line.includes('CPU use')) {
+                        const match = line.match(/([\d.]+)% CPU use with (\d+) MPI tasks/);
+                        if (match) {
+                            basicPerf.push({
+                                label: 'CPU使用率',
+                                value: `${match[1]}%`
+                            });
+                            neighborStats.push({
+                                label: 'MPI任务数',
+                                value: match[2]
+                            });
+                        }
+                    }
+                    else if (line.includes('MPI task timing breakdown:')) {
+                        timingData.push({
+                            section: 'header',
+                            content: line
+                        });
+                    }
+                    else if (line.includes('Section |')) {
+                        timingData.push({
+                            section: 'header',
+                            content: line
+                        });
+                        timingData.push({
+                            section: 'separator',
+                            content: '---------------------------------------------------------------'
+                        });
+                    }
+                    else if (line.match(/^\s*(Pair|Neigh|Comm|Output|Modify|Other)\s*\|/)) {
+                        const parts = line.split('|').map(p => p.trim());
+                        if (parts.length >= 5) {
+                            timingData.push({
+                                section: 'data',
+                                name: parts[0],
+                                min: parts[1],
+                                avg: parts[2],
+                                max: parts[3],
+                                varavg: parts[4],
+                                total: parts[5]
+                            });
+                        }
+                    }
+                    else if (line.match(/^(Nlocal|Nghost|Neighs|FullNghs):/)) {
+                        const [label, ...values] = line.split(':');
+                        neighborStats.push({
+                            label: label,
+                            value: values.join(':').trim()
+                        });
+                    }
+                    else if (line.includes('Total # of neighbors') || 
+                             line.includes('Ave neighs/atom') || 
+                             line.includes('Neighbor list builds')) {
+                        // 处理这些特殊格式的行
+                        const match = line.match(/(.*?=)\s*(.*)/) || [null, line, ''];
+                        neighborStats.push({
+                            label: match[1] || '',
+                            value: match[2] || line
+                        });
+                    }
+                    else if (line.includes('Total wall time')) {
+                        const match = line.match(/Total wall time: (.*)/);
+                        if (match) {
+                            basicPerf.push({
+                                label: '总运行时间',
+                                value: match[1]
+                            });
+                        }
+                    }
+                });
+                
+                // 更新基本性能信息
+                let basicPerfHtml = '<div class="performance-info-grid">';
+                basicPerf.forEach(item => {
+                    basicPerfHtml += formatPerformanceInfo(item.label, item.value);
+                });
+                basicPerfHtml += '</div>';
+                $('.performance-basic').html(basicPerfHtml);
+
+                // 更新系统统计信息
+                let neighborStatsHtml = '<div class="performance-info-grid">';
+
+                // 处理器和MPI信息放在第一行
+                neighborStatsHtml += '<div class="performance-info-row">';
+                const procInfo = neighborStats.find(item => item.label === '处理器数量');
+                const mpiInfo = neighborStats.find(item => item.label === 'MPI任务数');
+                if (procInfo) {
+                    neighborStatsHtml += formatPerformanceInfo(procInfo.label, procInfo.value);
+                }
+                if (mpiInfo) {
+                    neighborStatsHtml += formatPerformanceInfo(mpiInfo.label, mpiInfo.value);
+                }
+                neighborStatsHtml += '</div>';
+
+                // 原子和步数信息放在第二行
+                neighborStatsHtml += '<div class="performance-info-row">';
+                const atomInfo = neighborStats.find(item => item.label === '原子数量');
+                const stepInfo = neighborStats.find(item => item.label === '模拟步数');
+                if (atomInfo) {
+                    neighborStatsHtml += formatPerformanceInfo(atomInfo.label, atomInfo.value);
+                }
+                if (stepInfo) {
+                    neighborStatsHtml += formatPerformanceInfo(stepInfo.label, stepInfo.value);
+                }
+                neighborStatsHtml += '</div>';
+
+                // 邻居列表相关信息放在一起
+                const neighborInfos = neighborStats.filter(item => 
+                    item.label.includes('Neighs') || 
+                    item.label.includes('neighbors') ||
+                    item.label.includes('neighs/atom') ||
+                    item.label.includes('Neighbor list builds')
+                );
+
+                // 邻居信息标题
+                neighborStatsHtml += '<div class="info-section-title">邻居列表信息</div>';
+
+                // 显示邻居列表相关信息
+                neighborInfos.forEach(item => {
+                    neighborStatsHtml += `<div class="performance-info-row">`;
+                    neighborStatsHtml += formatPerformanceInfo(item.label, item.value);
+                    neighborStatsHtml += '</div>';
+                });
+
+                neighborStatsHtml += '</div>';
+                $('.performance-neighbors').html(neighborStatsHtml);
+
+                // 更新MPI任务时间分析表格
+                let timingHtml = '';
+                timingData.forEach(item => {
+                    if (item.section === 'header') {
+                        // 只显示包含 'Section |' 的表头，跳过 'MPI task timing breakdown:'
+                        if (item.content.includes('Section |')) {
+                            timingHtml += `<tr><th colspan="6" class="text-center">${item.content}</th></tr>`;
+                        }
+                    }
+                    else if (item.section === 'separator') {
+                        timingHtml += `<tr><td colspan="6" class="separator">${item.content}</td></tr>`;
+                    }
+                    else if (item.section === 'data') {
+                        timingHtml += `
+                            <tr>
+                                <td><span class="performance-label">${item.name}</span></td>
+                                <td class="text-right"><span class="performance-value">${item.min}</span></td>
+                                <td class="text-right"><span class="performance-value">${item.avg}</span></td>
+                                <td class="text-right"><span class="performance-value">${item.max}</span></td>
+                                <td class="text-right"><span class="performance-value">${item.varavg}</span></td>
+                                <td class="text-right"><span class="performance-value">${item.total}</span></td>
+                            </tr>
+                        `;
+                    }
+                });
+                $('.performance-timing').html(timingHtml);
+                
+                // 更新进度条
+                $('.progress-bar').css('width', response.progress + '%');
+            }
+
+            function pollSimulationOutput() {
+                outputUpdateInterval = setInterval(function() {
+                    $.ajax({
+                        url: '{% url "demo001:get_simulation_output" %}',
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.status === 'running') {
+                                updateOutput(response);
+                            } else if (response.status === 'completed') {
+                                updateOutput(response);
+                                simulationCompleted();
+                            } else if (response.status === 'error') {
+                                showError('模拟过程出错：' + response.message);
+                                simulationCompleted();
+                            }
+                        },
+                        error: function() {
+                            showError('获取模拟输出失败');
+                            simulationCompleted();
+                        }
+                    });
+                }, 1000);
+            }
+
+            function simulationCompleted() {
+                clearInterval(outputUpdateInterval);
+                simulationRunning = false;
+                $('#startSimulation').prop('disabled', false);
+            }
+
+            function showError(message) {
+                $('.setup-output').append('\nError: ' + message);
+                simulationCompleted();
+            }
+        });
+    </script>
+</body>
+</html> 
