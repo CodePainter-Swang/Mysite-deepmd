@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: center; justify-content: center; text-align: center;">
-    <img src="demo001/static/img/MD.png" alt="AI for Science" width="150" style="margin-right: 10px;">
+    <img src="demo001/static/img/MD.png" alt="AI for Science" width="100" style="margin-right: 10px;">
 </div>
 
 # AI for Science: 基于深度势能的分子动力学模拟平台
