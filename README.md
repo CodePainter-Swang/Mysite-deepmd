@@ -1,9 +1,8 @@
 <div style="display: flex; align-items: center; justify-content: center; text-align: center;">
     <img src="demo001/static/img/MD.png" alt="AI for Science" width="150" style="margin-right: 10px;">
-    <h1 style="font-size: 2.0em; margin: 0; font-family: 'Arial', sans-serif; color: #333;">AI for Science: 基于深度势能的分子动力学模拟平台</h1>
 </div>
 
-# AI for Science: Molecular Dynamics Simulations
+# AI for Science: 基于深度势能的分子动力学模拟平台
 
 Welcome to the AI for Science project, a powerful tool for conducting molecular dynamics simulations using deep learning models. This project leverages the capabilities of DeepMD to simulate complex molecular systems with high accuracy and efficiency.
 
