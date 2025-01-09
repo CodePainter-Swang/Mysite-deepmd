@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/analysis.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <header>
@@ -38,35 +39,37 @@
     <main class="container mt-4">
         <div class="card">
             <div class="card-header">
-                <h2>分子动力学模拟配置</h2>
+                <h2><i class="fas fa-cogs"></i> 分子动力学模拟配置</h2>
             </div>
             <div class="card-body">
                 <form id="simulationForm" method="POST">
                     {% csrf_token %}
                     
-                    <!-- 第一行：分子系统数据集 -->
-                    <div class="form-group">
-                        <label for="system">分子系统数据集</label>
-                        <select class="form-control" id="system" name="system">
-                            {% for system in system_files %}
-                                <option value="{{ system.value }}">{{ system.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <small class="form-text text-muted">选择要进行模拟的分子系统</small>
-                    </div>
-
-                    <!-- 在分子系统数据集和原子质量配置之间添加 -->
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="system_type">分子系统类型</label>
-                            <select class="form-control" id="system_type" name="system_type">
-                                {% for type in system_types %}
-                                    <option value="{{ type.value }}">{{ type.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <small class="form-text text-muted">选择分子系统类型</small>
+                    <!-- 系统配置部分 -->
+                    <div class="config-section">
+                        <h4 class="section-title"><i class="fas fa-cube"></i> 系统配置</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="system">分子系统数据集</label>
+                                <select class="form-control" id="system" name="system">
+                                    {% for system in system_files %}
+                                        <option value="{{ system.value }}">{{ system.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">选择要进行模拟的分子系统</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="system_type">分子系统类型</label>
+                                <select class="form-control" id="system_type" name="system_type">
+                                    {% for type in system_types %}
+                                        <option value="{{ type.value }}">{{ type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">选择分子系统类型</small>
+                            </div>
                         </div>
-                        <div class="form-group col-md-6">
+
+                        <div class="form-group">
                             <label for="deepmd_model">深度势能模型</label>
                             <select class="form-control" id="deepmd_model" name="deepmd_model" disabled>
                                 <option value="">请先选择分子系统类型</option>
@@ -75,9 +78,9 @@
                         </div>
                     </div>
 
-                    <!-- 第二行：原子质量配置 -->
-                    <div class="form-group">
-                        <label>原子质量配置</label>
+                    <!-- 原子配置部分 -->
+                    <div class="config-section">
+                        <h4 class="section-title"><i class="fas fa-atom"></i> 原子配置</h4>
                         <div class="mass-config" id="massConfigContainer">
                             <div class="input-group mb-2 mass-row">
                                 <div class="input-group-prepend">
@@ -85,6 +88,9 @@
                                     <span class="input-group-text type-number">1</span>
                                 </div>
                                 <input type="number" class="form-control" name="mass[]" value="16" step="0.1" required>
+                                <select class="form-control" name="atom_type[]" required disabled>
+                                    <option value="">请先选择分子系统类型</option>
+                                </select>
                                 <div class="input-group-append">
                                     <span class="input-group-text">amu</span>
                                     <button type="button" class="btn btn-outline-danger remove-mass" style="display: none;">
@@ -96,66 +102,137 @@
                         <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addMassBtn">
                             <i class="fas fa-plus"></i> 添加原子类型
                         </button>
-                        <small class="form-text text-muted">配置不同类型原子的质量</small>
                     </div>
 
-                    <!-- 基本参数设置 -->
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="units">单位制</label>
-                            <select class="form-control" id="units" name="units">
-                                <option value="metal" selected>metal</option>
-                                <option value="real">real</option>
-                                <option value="lj">lj</option>
-                            </select>
+                    <!-- 模拟参数部分 -->
+                    <div class="config-section">
+                        <h4 class="section-title"><i class="fas fa-sliders-h"></i> 模拟参数</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="units">单位制</label>
+                                <select class="form-control" id="units" name="units">
+                                    <option value="metal" selected>metal</option>
+                                    <option value="real">real</option>
+                                    <option value="lj">lj</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="boundary">边界条件</label>
+                                <select class="form-control" id="boundary" name="boundary">
+                                    <option value="p p p" selected>周期性边界 (p p p)</option>
+                                    <option value="f f f">固定边界 (f f f)</option>
+                                    <option value="p p f">混合边界 (p p f)</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="boundary">边界条件</label>
-                            <select class="form-control" id="boundary" name="boundary">
-                                <option value="p p p" selected>周期性边界 (p p p)</option>
-                                <option value="f f f">固定边界 (f f f)</option>
-                                <option value="p p f">混合边界 (p p f)</option>
-                            </select>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="temperature">温度 (K)</label>
+                                <input type="number" class="form-control" id="temperature" name="temperature" value="330.0">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="timestep">时间步长 (ps)</label>
+                                <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 温度和时间步长设置 -->
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="temperature">温度 (K)</label>
-                            <input type="number" class="form-control" id="temperature" name="temperature" value="330.0">
+                    <!-- 输出控制部分 -->
+                    <div class="config-section">
+                        <h4 class="section-title"><i class="fas fa-file-export"></i> 输出控制</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="runsteps">模拟步数</label>
+                                <input type="number" class="form-control" id="runsteps" name="runsteps" value="1000">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="thermo">热力学信息输出频率</label>
+                                <input type="number" class="form-control" id="thermo" name="thermo" value="100">
+                            </div>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="timestep">时间步长 (ps)</label>
-                            <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
+
+                        <!-- 轨迹输出配置，默认隐藏 -->
+                        <div class="form-row" id="dumpConfig" style="display: none;">
+                            <div class="form-group col-md-4">
+                                <label for="dump">轨迹输出频率</label>
+                                <input type="number" class="form-control" id="dump" name="dump" value="100">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 输出设置 -->
-                    <div class="form-row">
-                        <div class="form-group col-md-4">
-                            <label for="runsteps">模拟步数</label>
-                            <input type="number" class="form-control" id="runsteps" name="runsteps" value="1000">
+                    <!-- 输出配置卡片 -->
+                    <div class="config-section">
+                        <h4 class="section-title"><i class="fas fa-toggle-on"></i> 输出配置</h4>
+                        
+                        <!-- 启用轨迹输出 -->
+                        <div class="form-group d-flex align-items-center">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableDump" name="enableDump" class="toggle-switch-checkbox">
+                                <label class="toggle-switch-label" for="enableDump">
+                                    <span class="toggle-switch-inner"></span>
+                                    <span class="toggle-switch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="toggle-switch-text">启用轨迹输出</span>
                         </div>
-                        <div class="form-group col-md-4">
-                            <label for="thermo">热力学信息输出频率</label>
-                            <input type="number" class="form-control" id="thermo" name="thermo" value="100">
-                        </div>
-                        <div class="form-group col-md-4">
+                        <!-- 轨迹输出频率，默认隐藏 -->
+                        <div class="form-group" id="dumpFrequencyConfig" style="display: none;">
                             <label for="dump">轨迹输出频率</label>
                             <input type="number" class="form-control" id="dump" name="dump" value="100">
                         </div>
+                        
+                        <!-- 启用原子力输出 -->
+                        <div class="form-group d-flex align-items-center">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableForce" name="enableForce" class="toggle-switch-checkbox">
+                                <label class="toggle-switch-label" for="enableForce">
+                                    <span class="toggle-switch-inner"></span>
+                                    <span class="toggle-switch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="toggle-switch-text">启用原子力输出</span>
+                        </div>
+                        <!-- 原子力输出频率，默认隐藏 -->
+                        <div class="form-group" id="forceFrequencyConfig" style="display: none;">
+                            <label for="forceDump">原子力输出频率</label>
+                            <input type="number" class="form-control" id="forceDump" name="forceDump" value="100">
+                        </div>
+                        
+                        <!-- 启用RDF计算 -->
+                        <div class="form-group d-flex align-items-center">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableRDF" name="enableRDF" class="toggle-switch-checkbox">
+                                <label class="toggle-switch-label" for="enableRDF">
+                                    <span class="toggle-switch-inner"></span>
+                                    <span class="toggle-switch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="toggle-switch-text">启用RDF计算</span>
+                        </div>
+                        <!-- RDF采样和输出频率，默认隐藏 -->
+                        <div class="form-group" id="rdfConfig" style="display: none;">
+                            <label for="rdfSample">RDF采样频率</label>
+                            <input type="number" class="form-control" id="rdfSample" name="rdfSample" value="100">
+                            <label for="rdfDump">RDF输出频率</label>
+                            <input type="number" class="form-control" id="rdfDump" name="rdfDump" value="100">
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" id="startSimulation">开始模拟</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="startSimulation">
+                            <i class="fas fa-play"></i> 开始模拟
+                        </button>
+                    </div>
                 </form>
 
+                <!-- 添加模拟输出部分 -->
                 <div id="simulationOutput" class="mt-4" style="display: none;">
                     <h4>模拟输出</h4>
                     <div class="progress mb-3">
                         <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                     </div>
-                    
+
                     <div class="output-sections">
                         <!-- 设置信息 -->
                         <div class="output-section">
@@ -608,12 +685,43 @@
                 simulationRunning = false;
             }
 
-            const massContainer = $('#massConfigContainer');
-            const addMassBtn = $('#addMassBtn');
+            // 存储原子类型映射
+            const atomTypesMap = {{ atom_types_map|safe }};
             
-            // 添加新的原子类型
-            addMassBtn.click(function() {
-                const currentCount = massContainer.children('.mass-row').length;
+            // 当分子系统类型改变时更新原子类型选项
+            $('#system_type').change(function() {
+                const systemType = $(this).val();
+                updateAtomTypeSelects(systemType);
+            });
+            
+            function updateAtomTypeSelects(systemType) {
+                const atomTypes = atomTypesMap[systemType] || [];
+                const selects = $('select[name="atom_type[]"]');
+                
+                selects.each(function() {
+                    const select = $(this);
+                    select.empty();
+                    
+                    if (atomTypes.length > 0) {
+                        select.prop('disabled', false);
+                        atomTypes.forEach(type => {
+                            select.append($('<option></option>')
+                                .val(type)
+                                .text(type));
+                        });
+                    } else {
+                        select.prop('disabled', true)
+                            .append('<option value="">请先选择分子系统类型</option>');
+                    }
+                });
+            }
+            
+            // 添加新的原子类型行
+            $('#addMassBtn').click(function() {
+                const currentCount = $('#massConfigContainer').children('.mass-row').length;
+                const systemType = $('#system_type').val();
+                const atomTypes = atomTypesMap[systemType] || [];
+                
                 const newRow = $(`
                     <div class="input-group mb-2 mass-row">
                         <div class="input-group-prepend">
@@ -621,6 +729,11 @@
                             <span class="input-group-text type-number">${currentCount + 1}</span>
                         </div>
                         <input type="number" class="form-control" name="mass[]" value="1.0" step="0.1" required>
+                        <select class="form-control" name="atom_type[]" required ${!atomTypes.length ? 'disabled' : ''}>
+                            ${!atomTypes.length ? 
+                                '<option value="">请先选择分子系统类型</option>' : 
+                                atomTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                        </select>
                         <div class="input-group-append">
                             <span class="input-group-text">amu</span>
                             <button type="button" class="btn btn-outline-danger remove-mass">
@@ -630,12 +743,12 @@
                     </div>
                 `).hide().fadeIn(300);
                 
-                massContainer.append(newRow);
+                $('#massConfigContainer').append(newRow);
                 updateRemoveButtons();
             });
             
             // 删除原子类型
-            massContainer.on('click', '.remove-mass', function() {
+            $('#massConfigContainer').on('click', '.remove-mass', function() {
                 const row = $(this).closest('.mass-row');
                 row.fadeOut(300, function() {
                     row.remove();
@@ -646,20 +759,53 @@
             
             // 更新类型编号
             function updateTypeNumbers() {
-                massContainer.find('.type-number').each(function(index) {
+                $('#massConfigContainer').find('.type-number').each(function(index) {
                     $(this).text(index + 1);
                 });
             }
             
             // 更新删除按钮显示
             function updateRemoveButtons() {
-                const rows = massContainer.children('.mass-row');
+                const rows = $('#massConfigContainer').children('.mass-row');
                 if (rows.length > 1) {
                     $('.remove-mass').show();
                 } else {
                     $('.remove-mass').hide();
                 }
             }
+
+            // 页面加载时自动加载默认系统类型的深度势能模型
+            function loadInitialModels() {
+                const defaultSystemType = $('#system_type').val();  // 获取默认选中的系统类型
+                if (defaultSystemType) {
+                    // 发送AJAX请求获取对应的模型列表
+                    $.ajax({
+                        url: '{% url "demo001:get_deepmd_models" %}',
+                        data: { system_type: defaultSystemType },
+                        success: function(response) {
+                            const modelSelect = $('#deepmd_model');
+                            modelSelect.empty().prop('disabled', false);
+                            response.models.forEach(function(model) {
+                                modelSelect.append(
+                                    $('<option></option>')
+                                        .val(model.value)
+                                        .text(model.name)
+                                );
+                            });
+                            // 更新原子类型选择
+                            updateAtomTypeSelects(defaultSystemType);
+                        },
+                        error: function() {
+                            $('#deepmd_model').empty()
+                                .prop('disabled', true)
+                                .append('<option value="">加载模型失败</option>');
+                        }
+                    });
+                }
+            }
+
+            // 页面加载完成后立即加载默认模型
+            loadInitialModels();
 
             // 当分子系统类型改变时更新深度势能模型选项
             $('#system_type').change(function() {
@@ -680,6 +826,8 @@
                                         .text(model.name)
                                 );
                             });
+                            // 更新原子类型选择
+                            updateAtomTypeSelects(systemType);
                         },
                         error: function() {
                             modelSelect.empty()
@@ -693,6 +841,44 @@
                         .append('<option value="">请先选择分子系统类型</option>');
                 }
             });
+
+            // 监听启用轨迹输出复选框的变化
+            $('#enableDump').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#dumpFrequencyConfig').show();
+                } else {
+                    $('#dumpFrequencyConfig').hide();
+                }
+            });
+
+            // 监听启用原子力输出复选框的变化
+            $('#enableForce').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#forceFrequencyConfig').show();
+                } else {
+                    $('#forceFrequencyConfig').hide();
+                }
+            });
+
+            // 监听启用RDF计算复选框的变化
+            $('#enableRDF').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#rdfConfig').show();
+                } else {
+                    $('#rdfConfig').hide();
+                }
+            });
+
+            // 页面加载时根据复选框状态初始化显示
+            if ($('#enableDump').is(':checked')) {
+                $('#dumpFrequencyConfig').show();
+            }
+            if ($('#enableForce').is(':checked')) {
+                $('#forceFrequencyConfig').show();
+            }
+            if ($('#enableRDF').is(':checked')) {
+                $('#rdfConfig').show();
+            }
         });
     </script>
 </body>

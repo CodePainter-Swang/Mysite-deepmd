@@ -15,6 +15,14 @@ import re
 simulation_processes = {}
 simulation_outputs = {}
 
+# 在文件开头添加系统类型到原子类型的映射
+SYSTEM_ATOM_TYPES = {
+    'water': ['O', 'H'],
+    'methane': ['C', 'H'],
+    'copper': ['Cu'],
+    # 可以继续添加其他系统类型
+}
+
 # Create your views here.
 
 def login_required(func):
@@ -270,7 +278,8 @@ def analysis(request):
     
     context = {
         'system_types': system_types,
-        'system_files': get_system_files()  # 使用辅助函数获取系统文件列表
+        'system_files': get_system_files(),
+        'atom_types_map': SYSTEM_ATOM_TYPES  # 传递原子类型映射到模板
     }
     return render(request, 'analysis.html', context)
 
@@ -302,17 +311,33 @@ def start_simulation(request):
             output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
             os.makedirs(output_dir, exist_ok=True)
             
-            # 获取所有的质量配置
-            masses = request.POST.getlist('mass[]')
-            
-            # 构建质量配置字符串
-            mass_config = '\n'.join(f'mass            {i+1} {mass}' 
-                                  for i, mass in enumerate(masses))
+            # 获取选择的分子系统
+            selected_system = request.POST.get('system', 'water.lmp')
+            system_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/{selected_system}'
             
             # 获取选择的系统类型和模型
             system_type = request.POST.get('system_type')
             model = request.POST.get('deepmd_model')
             model_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}/{model}'
+            
+            # 获取系统对应的原子类型
+            atom_types = SYSTEM_ATOM_TYPES.get(system_type, [''])
+            pair_coeff = f"pair_coeff      * * {' '.join(atom_types)}"
+            
+            # 获取原子质量和类型配置
+            masses = request.POST.getlist('mass[]')
+            atom_types = request.POST.getlist('atom_type[]')
+            
+            # 构建质量配置和group配置
+            mass_config = []
+            group_config = []
+            
+            for i, (mass, atom_type) in enumerate(zip(masses, atom_types), 1):
+                mass_config.append(f'mass            {i} {mass}    # {atom_type}')
+                group_config.append(f'group       {atom_type}  type {i}')
+            
+            mass_config = '\n'.join(mass_config)
+            group_config = '\n'.join(group_config)
             
             # 生成LAMMPS输入文件
             input_content = f"""# Molecular dynamics simulation
@@ -324,11 +349,14 @@ atom_style      atomic
 neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+read_data       {system_path}
 {mass_config}
 
+# 定义原子组
+{group_config}
+
 pair_style      deepmd  {model_path}
-pair_coeff      * *
+{pair_coeff}
 
 velocity        all create {request.POST.get('temperature', '330.0')} 23456789
 
@@ -336,10 +364,48 @@ fix             1 all nvt temp {request.POST.get('temperature', '330.0')} {reque
 timestep        {request.POST.get('timestep', '0.0005')}
 thermo_style    custom step pe ke etotal temp press vol
 thermo          {request.POST.get('thermo', '100')}
-dump            1 all custom {request.POST.get('dump', '100')} {output_dir}/dump/water.dump id type x y z
+"""
 
+            # 检查是否启用轨迹输出
+            if request.POST.get('enableDump') == 'on':
+                input_content += f"""
+#输出轨迹
+dump            1 all custom {request.POST.get('dump', '100')} {output_dir}/dump/Dump.dump id type x y z
+"""
+
+            # 检查是否启用原子力输出
+            if request.POST.get('enableForce') == 'on':
+                force_dump_frequency = request.POST.get('forceDump', '100')  # 获取用户输入的原子力输出频率
+                input_content += f"""
+#输出力
+compute myForce all property/atom fx fy fz
+dump 2 all custom {force_dump_frequency} {output_dir}/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
+"""
+
+            # 检查是否启用RDF计算
+            if request.POST.get('enableRDF') == 'on':
+                rdf_sample_frequency = request.POST.get('rdfSample', '100')  # 获取用户输入的RDF采样频率
+                rdf_dump_frequency = request.POST.get('rdfDump', '100')  # 获取用户输入的RDF输出频率
+                
+                # 生成RDF原子对
+                num_atom_types = len(atom_types)
+                rdf_pairs = []
+                for i in range(1, num_atom_types + 1):
+                    for j in range(i, num_atom_types + 1):
+                        rdf_pairs.append(f"{i} {j}")
+                
+                rdf_pairs_str = f"" + " ".join(rdf_pairs)
+                
+                input_content += f"""
+#输出RDF
+compute rdf all rdf 100 {rdf_pairs_str}
+fix 2 all ave/time {rdf_sample_frequency} 1 {rdf_dump_frequency} c_rdf[*] file {output_dir}/rdf/RDF.rdf mode vector
+"""
+
+            input_content += f"""
 run             {request.POST.get('runsteps', '1000')}
 """
+
             # 保存输入文件
             input_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/in.lammps'
             with open(input_file, 'w') as f:
@@ -418,39 +484,6 @@ def get_simulation_output(request):
         'output': formatted_output,
         'progress': sim_data['progress']
     })
-
-def generate_lammps_input(form_data):
-    """根据表单数据生成LAMMPS输入文件内容"""
-    # 定义输出目录
-    output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
-    
-    template = f"""# Molecular dynamics simulation
-
-units           {form_data.get('units', 'metal')}
-boundary        {form_data.get('boundary', 'p p p')}
-atom_style      atomic
-
-neighbor        2.0 bin
-neigh_modify    every 10 delay 0 check no
-
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
-mass            1 16
-mass            2 2
-
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/water/water.pb
-pair_coeff      * *
-
-velocity        all create {form_data.get('temperature', '330.0')} 23456789
-
-fix             1 all nvt temp {form_data.get('temperature', '330.0')} {form_data.get('temperature', '330.0')} 0.5
-timestep        {form_data.get('timestep', '0.0005')}
-thermo_style    custom step pe ke etotal temp press vol
-thermo          {form_data.get('thermo', '100')}
-dump            1 all custom {form_data.get('dump', '100')} {output_dir}/dump/water.dump id type x y z
-
-run             {form_data.get('runsteps', '1000')}
-"""
-    return template
 
 def monitor_simulation_output(user_id):
     """监控模拟进程的输出"""
