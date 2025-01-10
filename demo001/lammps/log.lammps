@@ -34,11 +34,18 @@ timestep        0.0005
 thermo_style    custom step pe ke etotal temp press vol
 thermo          100
 
+#输出轨迹
+dump            1 all custom 100 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump id type x y z
+
 #输出力
 compute myForce all property/atom fx fy fz
 dump 2 all custom 100 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
 
-run             100
+#输出RDF
+compute rdf all rdf 100 1 1 1 2 2 2
+fix 2 all ave/time 100 1 100 c_rdf[*] file /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
+
+run             200
 
 CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 
@@ -67,42 +74,48 @@ Neighbor list info ...
   master list distance cutoff = 8
   ghost atom cutoff = 8
   binsize = 4, bins = 4 4 4
-  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
   (1) pair deepmd, perpetual
       attributes: full, newton on
       pair build: full/bin/atomonly
       stencil: full/bin/3d
       bin: standard
-Per MPI rank memory allocation (min/avg/max) = 4.283 | 4.283 | 4.283 Mbytes
+  (2) compute rdf, occasional, half/full from (1)
+      attributes: half, newton on
+      pair build: halffull/newton
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 6.172 | 6.172 | 6.172 Mbytes
 Step PotEng KinEng TotEng Temp Press Volume 
        0   -29941.641    8.1472669   -29933.494          330    7112.9818    1927.3176 
      100   -29941.636    8.1491936   -29933.487    330.07804   -3927.3507    1927.3176 
-Loop time of 4.21954 on 1 procs for 100 steps with 192 atoms
+     200   -29941.818    8.3182368     -29933.5    336.92503     4600.448    1927.3176 
+Loop time of 8.46853 on 1 procs for 200 steps with 192 atoms
 
-Performance: 1.024 ns/day, 23.442 hours/ns, 23.699 timesteps/s
-915.1% CPU use with 1 MPI tasks x no OpenMP threads
+Performance: 1.020 ns/day, 23.524 hours/ns, 23.617 timesteps/s
+926.1% CPU use with 1 MPI tasks x no OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 4.1907     | 4.1907     | 4.1907     |   0.0 | 99.32
-Neigh   | 0.022056   | 0.022056   | 0.022056   |   0.0 |  0.52
-Comm    | 0.0035796  | 0.0035796  | 0.0035796  |   0.0 |  0.08
-Output  | 0.00048563 | 0.00048563 | 0.00048563 |   0.0 |  0.01
-Modify  | 0.0019793  | 0.0019793  | 0.0019793  |   0.0 |  0.05
-Other   |            | 0.0007169  |            |       |  0.02
+Pair    | 8.4084     | 8.4084     | 8.4084     |   0.0 | 99.29
+Neigh   | 0.044406   | 0.044406   | 0.044406   |   0.0 |  0.52
+Comm    | 0.0068384  | 0.0068384  | 0.0068384  |   0.0 |  0.08
+Output  | 0.0013818  | 0.0013818  | 0.0013818  |   0.0 |  0.02
+Modify  | 0.0061979  | 0.0061979  | 0.0061979  |   0.0 |  0.07
+Other   |            | 0.001319   |            |       |  0.02
 
 Nlocal:        192.000 ave         192 max         192 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:        2105.00 ave        2105 max        2105 min
+Nghost:        2140.00 ave        2140 max        2140 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:         0.00000 ave           0 max           0 min
+Neighs:        20454.0 ave       20454 max       20454 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:      40798.0 ave       40798 max       40798 min
+FullNghs:      40908.0 ave       40908 max       40908 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 40798
-Ave neighs/atom = 212.48958
-Neighbor list builds = 10
+Total # of neighbors = 40908
+Ave neighs/atom = 213.06250
+Neighbor list builds = 20
 Dangerous builds not checked
-Total wall time: 0:00:05
+Total wall time: 0:00:09

@@ -4,12 +4,13 @@ from functools import wraps
 from django.contrib import messages
 from django.db import IntegrityError
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 import os
 from django.conf import settings
 import subprocess
 import threading
 import re
+from django.utils.encoding import escape_uri_path
 
 # 添加全局变量用于存储模拟进程和输出
 simulation_processes = {}
@@ -557,4 +558,149 @@ def monitor_simulation_output(user_id):
                 if any(re.search(pattern, line) for pattern in pattern_list):
                     sim_data['output'][output_type].append(line.strip())
                     break
+
+@login_required
+def get_simulation_data(request, data_type):
+    """获取模拟数据"""
+    try:
+        page = int(request.GET.get('page', 1))
+        timestep = request.GET.get('timestep')
+        items_per_page = int(request.GET.get('items_per_page', 100))
+        
+        # 确保文件存在且可读
+        file_paths = {
+            'trajectory': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump',
+            'force': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump',
+            'rdf': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf'
+        }
+        
+        if data_type not in file_paths:
+            return JsonResponse({'error': '无效的数据类型'}, status=400)
+            
+        file_path = file_paths[data_type]
+        if not os.path.exists(file_path):
+            return JsonResponse({'error': '数据文件不存在'}, status=404)
+            
+        if data_type == 'trajectory':
+            data = read_dump_file(file_path, timestep, page, items_per_page)
+        elif data_type == 'force':
+            data = read_dump_file(file_path, timestep, page, items_per_page)
+        elif data_type == 'rdf':
+            data = read_rdf_file(file_path, timestep, page, items_per_page)
+            
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def read_dump_file(file_path, timestep, page, items_per_page):
+    """读取dump文件数据"""
+    data = []
+    total_items = 0
+    timesteps = set()
+    
+    with open(file_path, 'r') as f:
+        current_timestep = None
+        reading_data = False
+        items_count = 0
+        
+        for line in f:
+            line = line.strip()
+            if line.startswith('ITEM: TIMESTEP'):
+                current_timestep = int(next(f).strip())
+                timesteps.add(current_timestep)
+                reading_data = False
+            elif line.startswith('ITEM: NUMBER OF ATOMS'):
+                total_items = int(next(f).strip())
+            elif line.startswith('ITEM: ATOMS'):
+                if str(current_timestep) == str(timestep):
+                    reading_data = True
+                    continue
+            elif reading_data:
+                items_count += 1
+                if (page - 1) * items_per_page < items_count <= page * items_per_page:
+                    values = line.split()
+                    data.append(values)
+    
+    return {
+        'data': data,
+        'total_items': total_items,
+        'timesteps': sorted(list(timesteps)),
+        'total_pages': (total_items + items_per_page - 1) // items_per_page
+    }
+
+def read_rdf_file(file_path, timestep=None, page=1, items_per_page=100):
+    """读取RDF文件数据"""
+    data = []
+    total_items = 0
+    timesteps = set()
+    current_timestep = None
+    
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+        
+        # 跳过头部注释
+        data_start = 0
+        for i, line in enumerate(lines):
+            if line.startswith('# TimeStep'):
+                data_start = i + 1
+                break
+        
+        # 读取时间步和数据
+        i = data_start
+        while i < len(lines):
+            if lines[i].startswith('#'):
+                if current_timestep:
+                    timesteps.add(current_timestep)
+                current_timestep = int(lines[i+1].strip().split()[0])
+                i += 2
+                continue
+                
+            if str(current_timestep) == str(timestep) or not timestep:
+                values = lines[i].strip().split()
+                if len(values) >= 8:  # 确保有足够的列
+                    data.append(values)
+            i += 1
+            
+        if current_timestep:
+            timesteps.add(current_timestep)
+            
+        total_items = len(data)
+        
+        # 分页
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        data = data[start_idx:end_idx]
+    
+    return {
+        'data': data,
+        'total_items': total_items,
+        'timesteps': sorted(list(timesteps)),
+        'total_pages': (total_items + items_per_page - 1) // items_per_page
+    }
+
+def download_data(request, data_type):
+    """下载模拟数据文件"""
+    file_paths = {
+        'trajectory': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump',
+        'force': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump',
+        'rdf': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf'
+    }
+    
+    file_names = {
+        'trajectory': 'Dump.dump',
+        'force': 'Force.dump',
+        'rdf': 'RDF.rdf'
+    }
+    
+    if data_type not in file_paths:
+        return HttpResponse('Invalid data type', status=400)
+        
+    file_path = file_paths[data_type]
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+        
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = f'attachment; filename={escape_uri_path(file_names[data_type])}'
+    return response
 

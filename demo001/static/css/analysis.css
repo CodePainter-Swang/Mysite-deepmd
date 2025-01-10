@@ -505,3 +505,63 @@ footer p {
     align-items: center;
     margin-bottom: 1rem;
 } 
+
+/* 结果展示卡片样式 */
+#simulationResults .nav-tabs {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+#simulationResults .nav-tabs .nav-link {
+    border: none;
+    color: #64748b;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+#simulationResults .nav-tabs .nav-link:hover {
+    color: #3b82f6;
+    border-bottom: 2px solid #93c5fd;
+}
+
+#simulationResults .nav-tabs .nav-link.active {
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+    font-weight: 500;
+}
+
+.data-controls {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.table-responsive {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.pagination {
+    margin-top: 1rem;
+}
+
+.pagination .page-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    color: #3b82f6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+#rdfChart {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+} 
