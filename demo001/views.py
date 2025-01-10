@@ -211,7 +211,7 @@ def upload_file(request):
         uploaded_file = request.FILES['file']
         
         # 确保目标目录存在
-        upload_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps'
+        upload_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys'
         os.makedirs(upload_dir, exist_ok=True)
         
         # 构建文件保存路径
