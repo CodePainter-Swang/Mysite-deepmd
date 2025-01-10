@@ -1,2 +1,3 @@
 __pycache__/
     *.pyc
+/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/*
