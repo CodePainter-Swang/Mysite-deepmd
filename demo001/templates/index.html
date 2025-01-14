@@ -20,7 +20,7 @@
                 <li><a href="{% url 'demo001:upload_file' %}">数据上传</a></li>
                 <li><a href="/analysis">分子模拟</a></li>
                 <li class="dropdown">
-                    <a href="/results">后管系统</a>
+                    <a href="/users">后管系统</a>
                     <ul class="dropdown-menu">
                         <li><a href="/profile">个人中心</a></li>
                         <li><a href="/users">用户列表</a></li>
@@ -53,7 +53,7 @@
                     <p>强大的分析工具，快速获取结果</p>
                 </div>
             </a>
-            <a href="/results" class="feature-card-link">
+            <a href="{% url 'demo001:visualization' %}" class="feature-card-link">
                 <div class="feature-card">
                     <h3>可视化展示</h3>
                     <p>直观的数据可视化和结果展示</p>

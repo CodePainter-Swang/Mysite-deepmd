@@ -19,4 +19,9 @@ urlpatterns = [
     path('get_deepmd_models/', views.get_deepmd_models, name='get_deepmd_models'),
     path('get_simulation_data/<str:data_type>/', views.get_simulation_data, name='get_simulation_data'),
     path('download_data/<str:data_type>/', views.download_data, name='download_data'),
+    path('visualization/', views.visualization, name='visualization'),
+    path('visualization/trajectory/', views.visualization_trajectory, name='visualization_trajectory'),
+    path('visualization/rdf/', views.visualization_rdf, name='visualization_rdf'),
+    path('visualization/trajectory/data/', views.get_trajectory_data, name='get_trajectory_data'),
+    path('visualization/trajectory/timestep/', views.get_timestep_data, name='get_timestep_data'),
 ]

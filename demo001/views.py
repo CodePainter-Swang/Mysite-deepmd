@@ -11,6 +11,8 @@ import subprocess
 import threading
 import re
 from django.utils.encoding import escape_uri_path
+import json
+import numpy as np
 
 # 添加全局变量用于存储模拟进程和输出
 simulation_processes = {}
@@ -703,4 +705,168 @@ def download_data(request, data_type):
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = f'attachment; filename={escape_uri_path(file_names[data_type])}'
     return response
+
+@login_required
+def visualization(request):
+    """可视化展示选择页面"""
+    return render(request, 'visualization.html')
+
+def parse_lammps_log():
+    """解析LAMMPS日志文件获取模拟参数"""
+    log_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/log.lammps'
+    simulation_info = {
+        'timestep': None,      # 时间步长
+        'temperature': None,   # 模拟温度
+        'num_atoms': None,     # 原子数量
+    }
+    
+    try:
+        with open(log_file, 'r') as f:
+            for line in f:
+                # 查找时间步长
+                if 'timestep' in line.lower():
+                    try:
+                        simulation_info['timestep'] = float(line.split()[-1])
+                        print("timestep:",simulation_info['timestep'])
+                    except (ValueError, IndexError):
+                        pass
+                
+                # 查找温度设置
+                elif 'temperature' in line.lower() and simulation_info['temperature'] is None:
+                    try:
+                        simulation_info['temperature'] = float(line.split()[-1])
+                    except (ValueError, IndexError):
+                        pass
+                
+                # 查找原子数量
+                elif 'atoms' in line.lower() and simulation_info['num_atoms'] is None:
+                    try:
+                        simulation_info['num_atoms'] = int(line.split()[0])
+                    except (ValueError, IndexError):
+                        pass
+                
+                # 如果所有信息都找到了，就退出循环
+                if all(v is not None for v in simulation_info.values()):
+                    break
+    except Exception as e:
+        print(f"Error reading log file: {e}")
+    
+    return simulation_info
+
+@login_required
+def visualization_trajectory(request):
+    """原子轨迹可视化页面"""
+    # 获取模拟参数
+    simulation_info = parse_lammps_log()
+    
+    # 转换时间步长到皮秒
+    if simulation_info['timestep']:
+        simulation_info['timestep_ps'] = simulation_info['timestep']  # 转换到皮秒
+    
+    return render(request, 'visualization_trajectory.html', {'simulation_info': simulation_info})
+
+@login_required
+def visualization_rdf(request):
+    """RDF曲线可视化页面"""
+    return render(request, 'visualization_rdf.html')
+
+@login_required
+def get_trajectory_data(request):
+    """获取轨迹数据的时间步长信息"""
+    try:
+        timesteps = []
+        current_timestep = None
+        
+        with open('/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump', 'r') as f:
+            for line in f:
+                if line.startswith('ITEM: TIMESTEP'):
+                    if current_timestep:
+                        timesteps.append(current_timestep)
+                    current_timestep = int(next(f))
+            
+            if current_timestep:
+                timesteps.append(current_timestep)
+        
+        return JsonResponse({
+            'status': 'success',
+            'timesteps': sorted(timesteps)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@login_required
+def get_timestep_data(request):
+    """获取特定时间步长的原子位置数据"""
+    timestep = request.GET.get('timestep')
+    if timestep is None:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'No timestep provided'
+        }, status=400)
+    
+    try:
+        atoms = []
+        current_timestep = None
+        reading_atoms = False
+        
+        with open('/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump', 'r') as f:
+            # 如果是初始状态 (timestep = 0)
+            if timestep == '0':
+                for line in f:
+                    if line.startswith('ITEM: ATOMS'):
+                        reading_atoms = True
+                        continue
+                    if reading_atoms and line.strip():
+                        try:
+                            id_, type_, x, y, z = map(float, line.strip().split())
+                            atoms.append({
+                                'id': int(id_),
+                                'type': int(type_),
+                                'x': float(x),
+                                'y': float(y),
+                                'z': float(z)
+                            })
+                        except ValueError:
+                            continue
+                        if len(atoms) == 192:  # 假设总原子数为192
+                            break
+            else:
+                # 原有的代码逻辑处理非零时间步长
+                for line in f:
+                    if line.startswith('ITEM: TIMESTEP'):
+                        current_timestep = int(next(f))
+                        reading_atoms = False
+                        if str(current_timestep) == str(timestep):
+                            # 跳过box信息
+                            for _ in range(4):
+                                next(f)
+                            reading_atoms = True
+                            continue
+                    
+                    if reading_atoms and line.strip():
+                        try:
+                            id_, type_, x, y, z = map(float, line.strip().split())
+                            atoms.append({
+                                'id': int(id_),
+                                'type': int(type_),
+                                'x': float(x),
+                                'y': float(y),
+                                'z': float(z)
+                            })
+                        except ValueError:
+                            continue
+        
+        return JsonResponse({
+            'status': 'success',
+            'timestep': timestep,
+            'atoms': atoms
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 

@@ -1,0 +1,63 @@
+.visualization-options {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.visualization-options h2 {
+    color: #005980;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.visualization-options p {
+    color: #666;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.visualization-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.visualization-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.visualization-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: #005980;
+}
+
+.card-icon {
+    font-size: 3rem;
+    color: #005980;
+    margin-bottom: 1.5rem;
+}
+
+.card-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #005980;
+}
+
+.card-content p {
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+} 
