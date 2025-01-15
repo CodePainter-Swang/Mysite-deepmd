@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDF曲线可视化 - DeepMD系统</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/visualization.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .rdf-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 180px);
+        }
+
+        .control-panel {
+            flex: 0 0 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .visualization-panel {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .rdf-options {
+            margin-bottom: 20px;
+        }
+
+        .rdf-checkbox {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rdf-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .rdf-checkbox input {
+            margin-right: 10px;
+        }
+
+        .rdf-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .rdf-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .rdf-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .rdf-card-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rdf-card-title {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            padding: 20px;
+            background: white;
+        }
+
+        .chart-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .chart-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-calculate {
+            width: 100%;
+            margin-top: 20px;
+            background-color: #007bff;
+            border: none;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-calculate:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .system-select {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .system-select select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 1rem;
+        }
+
+        .rdf-options-group {
+            display: none;
+        }
+
+        .rdf-options-group.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{% static 'img/MD.png' %}" alt="MD Logo" class="nav-logo">
+                <h1>AI for Science</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'demo001:index' %}">首页</a></li>
+                <li><a href="{% url 'demo001:upload_file' %}">数据上传</a></li>
+                <li><a href="/analysis">分子模拟</a></li>
+                <li class="dropdown">
+                    <a href="/users">后管系统</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/profile">个人中心</a></li>
+                        <li><a href="/users">用户列表</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="user-info">
+                <span class="username">{{ request.session.username }}</span>
+                <a href="{% url 'demo001:logout' %}" class="logout-btn">退出</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="rdf-container">
+            <!-- 左侧控制面板 -->
+            <div class="control-panel">
+                <h2 class="mb-4">RDF曲线选择</h2>
+                
+                <!-- 添加系统类型选择 -->
+                <div class="system-select">
+                    <h3 class="mb-3"><i class="fas fa-atom"></i> 选择分子系统</h3>
+                    <select id="systemType" class="form-control">
+                        <option value="">请选择分子系统...</option>
+                    </select>
+                </div>
+
+                <!-- 动态生成的RDF选项组将在这里插入 -->
+                <div id="rdfOptionsContainer">
+                </div>
+
+                <button class="btn btn-primary btn-calculate" id="calculateRDF">
+                    <i class="fas fa-chart-line"></i> 生成RDF曲线
+                </button>
+            </div>
+
+            <!-- 右侧可视化面板 -->
+            <div class="visualization-panel">
+                <h2 class="mb-4">RDF曲线展示</h2>
+                
+                <div class="rdf-cards" id="rdfCards">
+                    <!-- RDF卡片将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 DeepMD系统 版权所有</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 加载可用的系统类型
+            loadAvailableSystems();
+
+            function loadAvailableSystems() {
+                $.ajax({
+                    url: '{% url "demo001:get_available_systems" %}',
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            const systems = response.systems;
+                            const systemSelect = $('#systemType');
+                            
+                            // 清空现有选项（保留默认选项）
+                            systemSelect.find('option:not(:first)').remove();
+                            
+                            // 直接使用文件夹名作为选项
+                            Object.keys(systems).forEach(system => {
+                                systemSelect.append(
+                                    `<option value="${system}">${system}</option>`
+                                );
+                            });
+
+                            // 保存RDF类型信息供后续使用
+                            window.systemRdfTypes = systems;
+                        }
+                    },
+                    error: function(error) {
+                        console.error('获取系统类型失败:', error);
+                        alert('获取系统类型失败，请刷新页面重试');
+                    }
+                });
+            }
+
+            // 处理系统类型选择变化
+            $('#systemType').change(function() {
+                const selectedSystem = $(this).val();
+                const container = $('#rdfOptionsContainer');
+                container.empty();
+
+                if (selectedSystem && window.systemRdfTypes[selectedSystem]) {
+                    const rdfTypes = window.systemRdfTypes[selectedSystem];
+                    
+                    // 创建RDF选项组
+                    const optionsGroup = $(`
+                        <div class="rdf-options-group active">
+                            <h3 class="mb-3">${selectedSystem} RDF Options</h3>
+                        </div>
+                    `);
+
+                    // 添加复选框
+                    rdfTypes.forEach(type => {
+                        optionsGroup.append(`
+                            <label class="rdf-checkbox">
+                                <input type="checkbox" name="rdf-type" value="${type}"> 
+                                ${type} RDF curve
+                            </label>
+                        `);
+                    });
+
+                    container.append(optionsGroup);
+                }
+            });
+
+            // 处理计算RDF按钮点击事件
+            $('#calculateRDF').click(function() {
+                const selectedSystem = $('#systemType').val();
+                if (!selectedSystem) {
+                    alert('请先选择分子系统');
+                    return;
+                }
+
+                const selectedTypes = [];
+                $('input[name="rdf-type"]:checked').each(function() {
+                    selectedTypes.push($(this).val());
+                });
+
+                if (selectedTypes.length === 0) {
+                    alert('请至少选择一种RDF类型');
+                    return;
+                }
+
+                // 调用generate_rdf来运行Python脚本并显示结果
+                $.ajax({
+                    url: '{% url "demo001:generate_rdf" %}',
+                    method: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        types: selectedTypes  // 传递用户选择的RDF类型
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // 清空现有卡片
+                            $('#rdfCards').empty();
+                            
+                            // 创建RDF卡片
+                            const rdfTypes = {
+                                'O-O': 'O-O键的径向分布函数',
+                                'O-H': 'O-H键的径向分布函数',
+                                'H-H': 'H-H键的径向分布函数'
+                            };
+                            
+                            // 只为选中的RDF类型创建卡片
+                            Object.entries(response.image_urls).forEach(([type, url]) => {
+                                if (selectedTypes.includes(type)) {  // 确保只显示选中的类型
+                                    const rdfCard = `
+                                        <div class="rdf-card">
+                                            <div class="rdf-card-header">
+                                                <h5 class="rdf-card-title">${rdfTypes[type]}</h5>
+                                            </div>
+                                            <div class="chart-container">
+                                                <img src="${url}" alt="${type} RDF曲线" 
+                                                     style="width: 100%; height: auto;">
+                                            </div>
+                                        </div>
+                                    `;
+                                    $('#rdfCards').append(rdfCard);
+                                }
+                            });
+                        } else {
+                            alert('生成RDF曲线失败：' + response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('生成RDF曲线失败:', error);
+                        alert('生成RDF曲线失败，请稍后重试');
+                    }
+                });
+            });
+
+            // 为不同类型的RDF曲线分配颜色
+            function getColorForType(type) {
+                const colors = {
+                    'O-O': '#1f77b4',
+                    'O-H': '#ff7f0e',
+                    'H-H': '#2ca02c',
+                    'Cu-Cu': '#d62728',
+                    'C-C': '#9467bd',
+                    'C-H': '#8c564b'
+                };
+                return colors[type] || '#000000';
+            }
+        });
+    </script>
+</body>
+</html> 

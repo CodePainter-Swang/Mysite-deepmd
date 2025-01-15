@@ -727,7 +727,6 @@ def parse_lammps_log():
                 if 'timestep' in line.lower():
                     try:
                         simulation_info['timestep'] = float(line.split()[-1])
-                        print("timestep:",simulation_info['timestep'])
                     except (ValueError, IndexError):
                         pass
                 
@@ -869,4 +868,116 @@ def get_timestep_data(request):
             'status': 'error',
             'message': str(e)
         }, status=500)
+
+@login_required
+def calculate_rdf(request):
+    """处理RDF计算请求并返回数据"""
+    if request.method == 'POST':
+        system_type = request.POST.get('system')
+        selected_types = request.POST.getlist('types[]')
+        
+        # 验证系统类型和RDF类型的合法性
+        valid_systems = {
+            'water': ['O-O', 'O-H', 'H-H'],
+            'copper': ['Cu-Cu'],
+            'methane': ['C-C', 'C-H', 'H-H']
+        }
+        
+        if system_type not in valid_systems:
+            return JsonResponse({'error': '无效的系统类型'}, status=400)
+            
+        for rdf_type in selected_types:
+            if rdf_type not in valid_systems[system_type]:
+                return JsonResponse({'error': f'无效的RDF类型: {rdf_type}'}, status=400)
+        
+        try:
+            # 根据系统类型获取对应的模型路径
+            model_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'model', system_type)
+            
+            # 使用plot_rdf.py中的逻辑计算RDF
+            rdf_data = {}
+            for rdf_type in selected_types:
+                r, g_r = calculate_rdf_for_type(system_type, rdf_type, model_path)
+                rdf_data[rdf_type] = {
+                    'r': r.tolist(),
+                    'g_r': g_r.tolist()
+                }
+            
+            return JsonResponse(rdf_data)
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': '不支持的请求方法'}, status=405)
+
+@login_required
+def get_available_systems(request):
+    """获取model目录下可用的分子系统类型"""
+    try:
+        model_dir = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'model')
+        # 获取model目录下的所有子目录
+        systems = [d for d in os.listdir(model_dir) 
+                  if os.path.isdir(os.path.join(model_dir, d))]
+        
+        # 为每个系统定义其可用的RDF类型
+        system_rdf_types = {
+            'water': ['O-O', 'O-H', 'H-H'],
+            'copper': ['Cu-Cu']
+        }
+        
+        # 只返回实际存在的系统目录中已定义RDF类型的系统
+        available_systems = {sys: system_rdf_types.get(sys, []) 
+                           for sys in systems 
+                           if sys in system_rdf_types}
+        
+        return JsonResponse({
+            'status': 'success',
+            'systems': available_systems
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@login_required
+def generate_rdf(request):
+    """生成RDF曲线并返回图片路径"""
+    if request.method == 'POST':
+        try:
+            # 获取用户选择的RDF类型
+            selected_types = request.POST.getlist('types[]')
+            if not selected_types:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': '请选择至少一种RDF类型'
+                }, status=400)
+
+            # 运行RDF绘图脚本
+            script_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/plugins/plot_rdf.py'
+            subprocess.run(['python', script_path], check=True)
+            
+            # 只返回用户选择的RDF类型对应的图片URL
+            type_to_file = {
+                'O-O': '/static/rdf/fig1.png',
+                'O-H': '/static/rdf/fig2.png',
+                'H-H': '/static/rdf/fig3.png'
+            }
+            
+            selected_urls = {
+                rdf_type: type_to_file[rdf_type]
+                for rdf_type in selected_types
+                if rdf_type in type_to_file
+            }
+            
+            return JsonResponse({
+                'status': 'success',
+                'image_urls': selected_urls
+            })
+        except subprocess.CalledProcessError as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    return JsonResponse({'status': 'error', 'message': '不支持的请求方法'}, status=405)
 

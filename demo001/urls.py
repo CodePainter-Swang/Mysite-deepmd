@@ -24,4 +24,6 @@ urlpatterns = [
     path('visualization/rdf/', views.visualization_rdf, name='visualization_rdf'),
     path('visualization/trajectory/data/', views.get_trajectory_data, name='get_trajectory_data'),
     path('visualization/trajectory/timestep/', views.get_timestep_data, name='get_timestep_data'),
+    path('visualization/rdf/available_systems/', views.get_available_systems, name='get_available_systems'),
+    path('visualization/rdf/generate/', views.generate_rdf, name='generate_rdf'),
 ]
