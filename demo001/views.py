@@ -20,9 +20,10 @@ simulation_outputs = {}
 
 # 在文件开头添加系统类型到原子类型的映射
 SYSTEM_ATOM_TYPES = {
-    'water': ['O', 'H'],
-    'methane': ['C', 'H'],
-    'copper': ['Cu'],
+    'H2O': ['O', 'H'],
+    'LiCl': ['Li', 'Cl'],
+    'Cu': ['Cu'],
+    'Ag': ['Ag'],
     # 可以继续添加其他系统类型
 }
 
