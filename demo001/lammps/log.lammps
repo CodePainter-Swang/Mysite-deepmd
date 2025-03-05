@@ -8,25 +8,21 @@ atom_style      atomic
 neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/LiCl.lmp
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/Ag.lmp
 Reading data file ...
-  orthogonal box = (0.0000000 0.0000000 0.0000000) to (12.444700 12.444700 12.444700)
+  orthogonal box = (0.0000000 0.0000000 0.0000000) to (9.2745695 9.4047590 9.3272680)
   1 by 1 by 1 MPI processor grid
-WARNING: Atom style in data file differs from currently defined atom style (../read_data.cpp:516)
   reading atoms ...
-  64 atoms
+  32 atoms
   read_data CPU = 0.001 seconds
-mass            1 6.9    # Li
-mass            2 35.4    # Cl
+mass            1 47    # Ag
 
 # 定义原子组
-group       Li  type 1
-32 atoms in group Li
-group       Cl  type 2
-32 atoms in group Cl
+group       Ag  type 1
+32 atoms in group Ag
 
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/LiCl/NPOMD-Mix-Compress-LiCl.pb
-pair_coeff      * * Li Cl
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/Ag/NPOMD-Mix-Compress-Ag.pb
+pair_coeff      * * Ag
 
 velocity        all create 330.0 23456789
 
@@ -43,10 +39,10 @@ compute myForce all property/atom fx fy fz
 dump 2 all custom 100 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
 
 #输出RDF
-compute rdf all rdf 100 1 1 1 2 2 2
+compute rdf all rdf 100 1 1
 fix 2 all ave/time 100 1 100 c_rdf[*] file /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
 
-run             500
+run             400
 
 CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 
@@ -72,9 +68,9 @@ CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 Neighbor list info ...
   update every 10 steps, delay 0 steps, check no
   max neighbors/atom: 2000, page size: 100000
-  master list distance cutoff = 9
-  ghost atom cutoff = 9
-  binsize = 4.5, bins = 3 3 3
+  master list distance cutoff = 8
+  ghost atom cutoff = 8
+  binsize = 4, bins = 3 3 3
   2 neighbor lists, perpetual/occasional/extra = 1 1 0
   (1) pair deepmd, perpetual
       attributes: full, newton on
@@ -86,40 +82,39 @@ Neighbor list info ...
       pair build: halffull/newton
       stencil: none
       bin: none
-Per MPI rank memory allocation (min/avg/max) = 6.099 | 6.099 | 6.099 Mbytes
+Per MPI rank memory allocation (min/avg/max) = 6.085 | 6.085 | 6.085 Mbytes
 Step PotEng KinEng TotEng Temp Press Volume 
-       0   -16053.015    2.6873184   -16050.328          330    2072071.7    1927.3176 
-     100   -19261.611    1651.2994   -17610.312     202777.9    961497.74    1927.3176 
-     200   -19386.557    240.51981   -19146.037     29535.59    160170.67    1927.3176 
-     300   -19403.913    67.735779   -19336.177    8317.8855    49251.535    1927.3176 
-     400   -19428.518    38.190153   -19390.328    4689.7124    10545.469    1927.3176 
-     500   -19434.266    21.703843   -19412.562    2665.2101    7275.8011    1927.3176 
-Loop time of 2.61626 on 1 procs for 500 steps with 64 atoms
+       0    -65.67441    1.3223313   -64.352078          330    12411.697     813.5718 
+     100    -71.47867    6.9731154   -64.505555    1740.2054   -22357.157     813.5718 
+     200   -71.369101    6.2971839   -65.071917    1571.5205   -22756.698     813.5718 
+     300    -70.65555    4.7732231   -65.882327     1191.202   -16990.694     813.5718 
+     400   -72.276897    5.7318838   -66.545013    1430.4446   -31464.979     813.5718 
+Loop time of 1.1545 on 1 procs for 400 steps with 32 atoms
 
-Performance: 8.256 ns/day, 2.907 hours/ns, 191.112 timesteps/s
-544.7% CPU use with 1 MPI tasks x no OpenMP threads
+Performance: 14.967 ns/day, 1.603 hours/ns, 346.469 timesteps/s
+458.9% CPU use with 1 MPI tasks x no OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 2.5684     | 2.5684     | 2.5684     |   0.0 | 98.17
-Neigh   | 0.031656   | 0.031656   | 0.031656   |   0.0 |  1.21
-Comm    | 0.0058671  | 0.0058671  | 0.0058671  |   0.0 |  0.22
-Output  | 0.001504   | 0.001504   | 0.001504   |   0.0 |  0.06
-Modify  | 0.0072922  | 0.0072922  | 0.0072922  |   0.0 |  0.28
-Other   |            | 0.001542   |            |       |  0.06
+Pair    | 1.1357     | 1.1357     | 1.1357     |   0.0 | 98.37
+Neigh   | 0.010726   | 0.010726   | 0.010726   |   0.0 |  0.93
+Comm    | 0.0032113  | 0.0032113  | 0.0032113  |   0.0 |  0.28
+Output  | 0.0007969  | 0.0007969  | 0.0007969  |   0.0 |  0.07
+Modify  | 0.0032954  | 0.0032954  | 0.0032954  |   0.0 |  0.29
+Other   |            | 0.0007408  |            |       |  0.06
 
-Nlocal:        64.0000 ave          64 max          64 min
+Nlocal:        32.0000 ave          32 max          32 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:        883.000 ave         883 max         883 min
+Nghost:        600.000 ave         600 max         600 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:        3189.00 ave        3189 max        3189 min
+Neighs:        1336.00 ave        1336 max        1336 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:      6378.00 ave        6378 max        6378 min
+FullNghs:      2672.00 ave        2672 max        2672 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 6378
-Ave neighs/atom = 99.656250
-Neighbor list builds = 50
+Total # of neighbors = 2672
+Ave neighs/atom = 83.500000
+Neighbor list builds = 40
 Dangerous builds not checked
-Total wall time: 0:00:03
+Total wall time: 0:00:01

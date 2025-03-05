@@ -417,17 +417,8 @@
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Step</th>
-                                                <th>r</th>
-                                                <th>O-O</th>
-                                                <th>O-O</th>
-                                                <th>O-H</th>
-                                                <th>O-H</th>
-                                                <th>H-H</th>
-                                                <th>H-H</th>
-                                            </tr>
+                                        <thead id="rdfTableHeader">
+                                            <!-- 表头将由JavaScript动态生成 -->
                                         </thead>
                                         <tbody id="rdfData">
                                         </tbody>
@@ -1231,18 +1222,23 @@
             // 更新RDF表格
             function updateRDFTable(data) {
                 let html = '';
-                data.forEach(function(item) {
-                    html += `<tr>
-                        <td>${item[0]}</td>
-                        <td>${item[1]}</td>
-                        <td>${item[2]}</td>
-                        <td>${item[3]}</td>
-                        <td>${item[4]}</td>
-                        <td>${item[5]}</td>
-                        <td>${item[6]}</td>
-                        <td>${item[7]}</td>
-                    </tr>`;
-                });
+                if (data && data.length > 0) {
+                    // 根据第一行数据的列数动态生成表格
+                    data.forEach(function(item) {
+                        html += '<tr>';
+                        // 遍历每一列数据
+                        for (let i = 0; i < item.length; i++) {
+                            // 对数值类型的数据进行格式化（保留4位小数）
+                            const value = typeof item[i] === 'number' ? 
+                                parseFloat(item[i]).toFixed(4) : item[i];
+                            html += `<td>${value}</td>`;
+                        }
+                        html += '</tr>';
+                    });
+                } else {
+                    // 如果没有数据，显示提示信息
+                    html = '<tr><td colspan="100%" class="text-center">暂无数据</td></tr>';
+                }
                 $('#rdfData').html(html);
             }
 
@@ -1255,64 +1251,77 @@
             $('#rdfTimestep').change(function() {
                 loadRDFData(1);
             });
-
-            // 绑定RDF时间步选择器变化事件
-            $('#rdfTimestep').change(function() {
-                loadRDFData(1);
-            });
-
-            // 加载RDF数据
-            function loadRDFData(page) {
-                const timestep = $('#rdfTimestep').val();
-                $.ajax({
-                    url: "{% url 'demo001:get_simulation_data' 'rdf' %}",
-                    data: {
-                        page: page,
-                        timestep: timestep,
-                        items_per_page: 100
-                    },
-                    success: function(response) {
-                        if (response.error) {
-                            console.error('加载RDF数据失败:', response.error);
-                            return;
-                        }
-                        updateRDFTable(response.data);
-                        updateRDFPagination(response.total_pages, page);
-                        if (response.timesteps && $('#rdfTimestep option').length <= 1) {
-                            updateTimestepOptions('rdfTimestep', response.timesteps);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('加载RDF数据失败:', error);
-                    }
-                });
-            }
-
-            // 更新RDF表格
-            function updateRDFTable(data) {
-                let html = '';
-                data.forEach(function(item) {
-                    html += `<tr>
-                        <td>${item[0]}</td>
-                        <td>${item[1]}</td>
-                        <td>${item[2]}</td>
-                        <td>${item[3]}</td>
-                        <td>${item[4]}</td>
-                        <td>${item[5]}</td>
-                        <td>${item[6]}</td>
-                        <td>${item[7]}</td>
-                    </tr>`;
-                });
-                $('#rdfData').html(html);
-            }
-
-            // 更新RDF分页
-            function updateRDFPagination(totalPages, currentPage) {
-                updatePagination('rdfPagination', totalPages, currentPage, loadRDFData);
-            }
 
             // 初始隐藏结果区域
             $('#simulationResults').hide();
+
+            // 定义不同系统类型的RDF表头映射
+            const rdfHeaderMappings = {
+                'H2O': {  // 水分子系统
+                    pairs: [
+                        { name: 'O-O', showCount: true },
+                        { name: 'O-H', showCount: true },
+                        { name: 'H-H', showCount: true }
+                    ]
+                },
+                'Cu': {    // 铜系统
+                    pairs: [
+                        { name: 'Cu-Cu', showCount: true }
+                    ]
+                },
+                'LiCl': {  // 氯化锂系统
+                    pairs: [
+                        { name: 'Li-Li', showCount: true },
+                        { name: 'Li-Cl', showCount: true },
+                        { name: 'Cl-Cl', showCount: true }
+                    ]
+                },
+                'Ag': {  // 银系统
+                    pairs: [
+                        { name: 'Ag-Ag', showCount: true }
+                    ]
+                }
+                // 可以继续添加其他系统类型
+            };
+
+            // 更新RDF表头函数
+            function updateRDFHeader() {
+                const systemType = $('#system_type').val();
+                const headerConfig = rdfHeaderMappings[systemType];
+                
+                if (!headerConfig) {
+                    console.warn('未找到系统类型的RDF配置：', systemType);
+                    return;
+                }
+
+                let headerHtml = '<tr><th>Step</th><th>r</th>';
+                
+                // 添加每个原子对的列
+                headerConfig.pairs.forEach(pair => {
+                    headerHtml += `<th>${pair.name}</th>`;
+                    if (pair.showCount) {
+                        headerHtml += `<th>${pair.name} Count</th>`;
+                    }
+                });
+                
+                headerHtml += '</tr>';
+                $('#rdfTableHeader').html(headerHtml);
+            }
+
+            // 当系统类型改变时更新表头
+            $('#system_type').change(function() {
+                updateRDFHeader();
+                // 如果RDF选项卡是可见的，重新加载数据
+                if ($('#rdfTab').is(':visible')) {
+                    loadRDFData(1);
+                }
+            });
+
+            // 页面加载时初始化表头
+            $(document).ready(function() {
+                // ... 其他初始化代码 ...
+                updateRDFHeader();
+            });
         });
     </script>
 </body>

@@ -660,7 +660,8 @@ def read_rdf_file(file_path, timestep=None, page=1, items_per_page=100):
                 
             if str(current_timestep) == str(timestep) or not timestep:
                 values = lines[i].strip().split()
-                if len(values) >= 8:  # 确保有足够的列
+                # 修改这里：只要有数据就添加，不要固定检查8列
+                if values:  # 只要有数据就添加
                     data.append(values)
             i += 1
             
@@ -879,7 +880,7 @@ def calculate_rdf(request):
         
         # 验证系统类型和RDF类型的合法性
         valid_systems = {
-            'water': ['O-O', 'O-H', 'H-H'],
+            'H2O': ['O-O', 'O-H', 'H-H'],
             'copper': ['Cu-Cu'],
             'methane': ['C-C', 'C-H', 'H-H']
         }
@@ -922,7 +923,7 @@ def get_available_systems(request):
         
         # 为每个系统定义其可用的RDF类型
         system_rdf_types = {
-            'water': ['O-O', 'O-H', 'H-H'],
+            'H2O': ['O-O', 'O-H', 'H-H'],
             'copper': ['Cu-Cu']
         }
         
