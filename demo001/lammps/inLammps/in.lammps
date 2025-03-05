@@ -7,16 +7,16 @@ atom_style      atomic
 neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/LiCl.lmp
-mass            1 6.9    # Li
-mass            2 35.4    # Cl
+read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/water.lmp
+mass            1 16    # O
+mass            2 2    # H
 
 # 定义原子组
-group       Li  type 1
-group       Cl  type 2
+group       O  type 1
+group       H  type 2
 
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/LiCl/NPOMD-Mix-Compress-LiCl.pb
-pair_coeff      * * Li Cl
+pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/H2O/NPOMD-Mix-Compress-H2O.pb
+pair_coeff      * * O H
 
 velocity        all create 330.0 23456789
 
@@ -36,4 +36,4 @@ dump 2 all custom 100 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/out
 compute rdf all rdf 100 1 1 1 2 2 2
 fix 2 all ave/time 100 1 100 c_rdf[*] file /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
 
-run             400
+run             1000

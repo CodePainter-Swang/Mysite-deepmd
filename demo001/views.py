@@ -840,53 +840,46 @@ def get_timestep_data(request):
         atoms = []
         current_timestep = None
         reading_atoms = False
+        box_info_lines = 0  # 用于跟踪box信息行数
         
         with open('/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump', 'r') as f:
-            # 如果是初始状态 (timestep = 0)
-            if timestep == '0':
-                for line in f:
-                    if line.startswith('ITEM: ATOMS'):
+            for line in f:
+                if line.startswith('ITEM: TIMESTEP'):
+                    current_timestep = int(next(f))
+                    reading_atoms = False
+                    box_info_lines = 0
+                    if str(current_timestep) == str(timestep):
+                        continue
+                
+                elif str(current_timestep) == str(timestep):
+                    if line.startswith('ITEM: NUMBER OF ATOMS'):
+                        continue
+                    elif line.startswith('ITEM: BOX BOUNDS'):
+                        box_info_lines = 3  # 需要跳过的box信息行数
+                        continue
+                    elif box_info_lines > 0:
+                        box_info_lines -= 1
+                        continue
+                    elif line.startswith('ITEM: ATOMS'):
                         reading_atoms = True
                         continue
-                    if reading_atoms and line.strip():
+                    elif reading_atoms and line.strip():
                         try:
-                            id_, type_, x, y, z = map(float, line.strip().split())
-                            atoms.append({
-                                'id': int(id_),
-                                'type': int(type_),
-                                'x': float(x),
-                                'y': float(y),
-                                'z': float(z)
-                            })
-                        except ValueError:
+                            values = line.strip().split()
+                            if len(values) >= 5:  # 确保有足够的数据
+                                atoms.append({
+                                    'id': int(values[0]),
+                                    'type': int(values[1]),
+                                    'x': float(values[2]),
+                                    'y': float(values[3]),
+                                    'z': float(values[4])
+                                })
+                        except (ValueError, IndexError):
                             continue
-                        if len(atoms) == 192:  # 假设总原子数为192
-                            break
-            else:
-                # 原有的代码逻辑处理非零时间步长
-                for line in f:
-                    if line.startswith('ITEM: TIMESTEP'):
-                        current_timestep = int(next(f))
-                        reading_atoms = False
-                        if str(current_timestep) == str(timestep):
-                            # 跳过box信息
-                            for _ in range(4):
-                                next(f)
-                            reading_atoms = True
-                            continue
-                    
-                    if reading_atoms and line.strip():
-                        try:
-                            id_, type_, x, y, z = map(float, line.strip().split())
-                            atoms.append({
-                                'id': int(id_),
-                                'type': int(type_),
-                                'x': float(x),
-                                'y': float(y),
-                                'z': float(z)
-                            })
-                        except ValueError:
-                            continue
+                
+                # 如果已经读取完当前时间步的数据，且不是初始状态，就退出循环
+                elif reading_atoms and str(current_timestep) != str(timestep):
+                    break
         
         return JsonResponse({
             'status': 'success',
