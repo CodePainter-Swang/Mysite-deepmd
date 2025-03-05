@@ -11,6 +11,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* 添加到现有的 style 标签中或通过 CSS 文件引入 */
+        .atom-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .info-item i.fa-cube {
+            color: #4a90e2;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -56,6 +73,10 @@
                 <div class="info-item">
                     <i class="fas fa-atom"></i>
                     <span>原子数: {{ simulation_info.num_atoms|default:"192" }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-cube"></i>
+                    <span>系统类型: {{ system_type }}</span>
                 </div>
             </div>
 
@@ -239,11 +260,9 @@
 
         // 获取原子颜色
         function getAtomColor(type) {
-            const colors = {
-                1: 0xff0000,  // 红色 - 氧原子
-                2: 0x0000ff   // 蓝色 - 氢原子
-            };
-            return colors[type] || 0x808080;
+            // 使用从后端传递的颜色映射
+            const colors = {{ color_mapping|safe }};
+            return colors[type] ? parseInt(colors[type].replace('#', '0x')) : 0x808080;
         }
 
         // 播放轨迹动画
@@ -321,11 +340,9 @@
 
         // 获取原子类型名称
         function getAtomTypeName(type) {
-            const types = {
-                1: 'O (氧)',
-                2: 'H (氢)'
-            };
-            return types[type] || `类型 ${type}`;
+            // 使用从后端传递的类型映射
+            const types = {{ type_mapping|safe }};
+            return types[type] ? `${types[type]} (类型 ${type})` : `类型 ${type}`;
         }
 
         // 添加重置函数

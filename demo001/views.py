@@ -311,6 +311,10 @@ def get_deepmd_models(request):
 def start_simulation(request):
     if request.method == 'POST':
         try:
+            # 保存系统类型到session
+            system_type = request.POST.get('system_type')
+            request.session['system_type'] = system_type
+            
             # 确保输出目录存在
             output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
             os.makedirs(output_dir, exist_ok=True)
@@ -320,7 +324,6 @@ def start_simulation(request):
             system_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/{selected_system}'
             
             # 获取选择的系统类型和模型
-            system_type = request.POST.get('system_type')
             model = request.POST.get('deepmd_model')
             model_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}/{model}'
             
@@ -760,11 +763,36 @@ def visualization_trajectory(request):
     # 获取模拟参数
     simulation_info = parse_lammps_log()
     
-    # 转换时间步长到皮秒
-    if simulation_info['timestep']:
-        simulation_info['timestep_ps'] = simulation_info['timestep']  # 转换到皮秒
+    # 从session中获取系统类型
+    system_type = request.session.get('system_type', 'H2O')
     
-    return render(request, 'visualization_trajectory.html', {'simulation_info': simulation_info})
+    # 获取对应的原子类型映射
+    atom_types = SYSTEM_ATOM_TYPES.get(system_type, ['O', 'H'])
+    
+    # 创建原子类型到颜色的映射
+    atom_colors = {
+        'O': '#ff0000',   # 红色
+        'H': '#0000ff',   # 蓝色
+        'Li': '#800080',  # 紫色
+        'Cl': '#00ff00',  # 绿色
+        'Cu': '#ffa500',  # 橙色
+        'Ag': '#c0c0c0',  # 银色
+    }
+    
+    # 为每个原子类型生成颜色映射
+    color_mapping = {i+1: atom_colors[atom_type] for i, atom_type in enumerate(atom_types)}
+    
+    # 为每个原子类型生成名称映射
+    type_mapping = {i+1: atom_type for i, atom_type in enumerate(atom_types)}
+    
+    context = {
+        'simulation_info': simulation_info,
+        'system_type': system_type,
+        'color_mapping': color_mapping,
+        'type_mapping': type_mapping,
+    }
+    
+    return render(request, 'visualization_trajectory.html', context)
 
 @login_required
 def visualization_rdf(request):
