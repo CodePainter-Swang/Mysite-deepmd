@@ -356,6 +356,7 @@ atom_style      atomic
 neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
+
 read_data       {system_path}
 {mass_config}
 
@@ -365,8 +366,16 @@ read_data       {system_path}
 pair_style      deepmd  {model_path}
 {pair_coeff}
 
-velocity        all create {request.POST.get('temperature', '330.0')} 23456789
+"""
 
+            # 检查是否启用随机初始速度
+            if request.POST.get('enableRandomVelocity') == 'on':
+                seed = request.POST.get('seed', '23456789')
+                input_content += f"""
+velocity        all create {request.POST.get('temperature', '330.0')} {seed}
+"""
+
+            input_content += f"""
 fix             1 all nvt temp {request.POST.get('temperature', '330.0')} {request.POST.get('temperature', '330.0')} 0.5
 timestep        {request.POST.get('timestep', '0.0005')}
 thermo_style    custom step pe ke etotal temp press vol

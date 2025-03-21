@@ -136,6 +136,25 @@
                                 <input type="number" class="form-control" id="timestep" name="timestep" value="0.0005" step="0.0001">
                             </div>
                         </div>
+
+                        <!-- 添加随机速度开关 -->
+                        <div class="form-group d-flex align-items-center">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableRandomVelocity" name="enableRandomVelocity" class="toggle-switch-checkbox" checked>
+                                <label class="toggle-switch-label" for="enableRandomVelocity">
+                                    <span class="toggle-switch-inner"></span>
+                                    <span class="toggle-switch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="toggle-switch-text">使用随机初始速度</span>
+                            <small class="form-text text-muted ml-3">启用后将使用LAMMPS的velocity命令生成随机初始速度</small>
+                        </div>
+
+                        <div class="form-group" id="seedConfig">
+                            <label for="seed">随机数种子</label>
+                            <input type="number" class="form-control" id="seed" name="seed" value="23456789">
+                            <small class="form-text text-muted">用于生成随机初始速度的种子值</small>
+                        </div>
                     </div>
 
                     <!-- 输出控制部分 -->
@@ -1028,16 +1047,25 @@
                 }
             });
 
-            // 页面加载时根据复选框状态初始化显示
-            if ($('#enableDump').is(':checked')) {
-                $('#dumpFrequencyConfig').show();
-            }
-            if ($('#enableForce').is(':checked')) {
-                $('#forceFrequencyConfig').show();
-            }
-            if ($('#enableRDF').is(':checked')) {
-                $('#rdfConfig').show();
-            }
+            // 监听随机速度开关的变化
+            $('#enableRandomVelocity').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#seedConfig').show();
+                } else {
+                    $('#seedConfig').hide();
+                }
+            });
+
+            // 页面加载时根据开关状态初始化显示
+            $(document).ready(function() {
+                // ... 其他初始化代码 ...
+                
+                if ($('#enableRandomVelocity').is(':checked')) {
+                    $('#seedConfig').show();
+                } else {
+                    $('#seedConfig').hide();
+                }
+            });
 
             // 加载轨迹数据
             function loadTrajectoryData(page) {
