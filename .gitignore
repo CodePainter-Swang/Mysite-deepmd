@@ -1,3 +1,6 @@
 __pycache__/
     *.pyc
 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/*
+/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/*
+/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/*
+/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/*

@@ -9,7 +9,7 @@ neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
 
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/cooper-v0.lmp
+read_data       /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/cooper.lmp
 Reading data file ...
   orthogonal box = (0.0000000 0.0000000 0.0000000) to (10.902600 10.902600 10.902600)
   1 by 1 by 1 MPI processor grid
@@ -24,27 +24,29 @@ mass            1 64    # Cu
 group       Cu  type 1
 108 atoms in group Cu
 
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/Cu/NPOMD-Mix-Cu-Compress.pb
+pair_style      deepmd  /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/Cu/NPOMD-Mix-Cu-Compress.pb
 pair_coeff      * * Cu
 
+
+velocity        all create 330.0 23456789
 
 fix             1 all nvt temp 330.0 330.0 0.5
 timestep        0.0005
 thermo_style    custom step pe ke etotal temp press vol
-thermo          1
+thermo          100
 
 #输出轨迹
-dump            1 all custom 1 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump id type x y z
+dump            1 all custom 100 /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump id type x y z
 
 #输出力
 compute myForce all property/atom fx fy fz
-dump 2 all custom 1 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
+dump 2 all custom 100 /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
 
 #输出RDF
 compute rdf all rdf 100 1 1
-fix 2 all ave/time 1 1 1 c_rdf[*] file /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
+fix 2 all ave/time 100 1 100 c_rdf[*] file /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
 
-run             1
+run             200
 
 CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
 
@@ -86,34 +88,35 @@ Neighbor list info ...
       bin: none
 Per MPI rank memory allocation (min/avg/max) = 6.185 | 6.185 | 6.185 Mbytes
 Step PotEng KinEng TotEng Temp Press Volume 
-       0   -398.06796            0   -398.06796            0    15472.135    1295.9559 
-       1   -398.06907 0.0011129516   -398.06796  0.080468861    15468.759    1295.9559 
-Loop time of 0.0223356 on 1 procs for 1 steps with 108 atoms
+       0   -398.06796    4.5641757   -393.50378          330    19233.896    1295.9559 
+     100   -397.74853    4.2480795   -393.50045    307.14555      19861.3    1295.9559 
+     200   -398.23371    4.7419575   -393.49176    342.85402    18878.128    1295.9559 
+Loop time of 2.54673 on 1 procs for 200 steps with 108 atoms
 
-Performance: 1.934 ns/day, 12.409 hours/ns, 44.772 timesteps/s
-415.4% CPU use with 1 MPI tasks x no OpenMP threads
+Performance: 3.393 ns/day, 7.074 hours/ns, 78.532 timesteps/s
+683.7% CPU use with 1 MPI tasks x no OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 0.021006   | 0.021006   | 0.021006   |   0.0 | 94.05
-Neigh   | 0          | 0          | 0          |   0.0 |  0.00
-Comm    | 2.3063e-05 | 2.3063e-05 | 2.3063e-05 |   0.0 |  0.10
-Output  | 0.0004338  | 0.0004338  | 0.0004338  |   0.0 |  1.94
-Modify  | 0.00083665 | 0.00083665 | 0.00083665 |   0.0 |  3.75
-Other   |            | 3.588e-05  |            |       |  0.16
+Pair    | 2.4907     | 2.4907     | 2.4907     |   0.0 | 97.80
+Neigh   | 0.044232   | 0.044232   | 0.044232   |   0.0 |  1.74
+Comm    | 0.0057848  | 0.0057848  | 0.0057848  |   0.0 |  0.23
+Output  | 0.0009002  | 0.0009002  | 0.0009002  |   0.0 |  0.04
+Modify  | 0.0040339  | 0.0040339  | 0.0040339  |   0.0 |  0.16
+Other   |            | 0.001101   |            |       |  0.04
 
 Nlocal:        108.000 ave         108 max         108 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Nghost:        2348.00 ave        2348 max        2348 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:        18969.0 ave       18969 max       18969 min
+Neighs:        18992.0 ave       18992 max       18992 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:      37938.0 ave       37938 max       37938 min
+FullNghs:      37984.0 ave       37984 max       37984 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 37938
-Ave neighs/atom = 351.27778
-Neighbor list builds = 0
+Total # of neighbors = 37984
+Ave neighs/atom = 351.70370
+Neighbor list builds = 20
 Dangerous builds not checked
-Total wall time: 0:00:00
+Total wall time: 0:00:02

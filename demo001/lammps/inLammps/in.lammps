@@ -8,30 +8,32 @@ neighbor        2.0 bin
 neigh_modify    every 10 delay 0 check no
 
 
-read_data       /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/cooper-v0.lmp
+read_data       /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/cooper.lmp
 mass            1 64    # Cu
 
 # 定义原子组
 group       Cu  type 1
 
-pair_style      deepmd  /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/Cu/NPOMD-Mix-Cu-Compress.pb
+pair_style      deepmd  /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/Cu/NPOMD-Mix-Cu-Compress.pb
 pair_coeff      * * Cu
 
+
+velocity        all create 330.0 23456789
 
 fix             1 all nvt temp 330.0 330.0 0.5
 timestep        0.0005
 thermo_style    custom step pe ke etotal temp press vol
-thermo          1
+thermo          100
 
 #输出轨迹
-dump            1 all custom 1 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump id type x y z
+dump            1 all custom 100 /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump id type x y z
 
 #输出力
 compute myForce all property/atom fx fy fz
-dump 2 all custom 1 /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
+dump 2 all custom 100 /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump id type c_myForce[1] c_myForce[2] c_myForce[3]
 
 #输出RDF
 compute rdf all rdf 100 1 1
-fix 2 all ave/time 1 1 1 c_rdf[*] file /work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
+fix 2 all ave/time 100 1 100 c_rdf[*] file /media/shared/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf mode vector
 
-run             1
+run             200

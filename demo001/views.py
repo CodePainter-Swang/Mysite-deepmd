@@ -214,7 +214,7 @@ def upload_file(request):
         uploaded_file = request.FILES['file']
         
         # 确保目标目录存在
-        upload_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys'
+        upload_dir = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'md_sys')
         os.makedirs(upload_dir, exist_ok=True)
         
         # 构建文件保存路径
@@ -240,7 +240,7 @@ def upload_file(request):
 
 def get_system_files():
     """获取分子系统数据集文件列表"""
-    md_sys_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys'
+    md_sys_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'md_sys')
     system_files = []
     
     try:
@@ -267,7 +267,7 @@ def get_system_files():
 @login_required
 def analysis(request):
     # 获取分子系统类型（目录名）
-    model_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model'
+    model_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'model')
     system_types = []
     
     try:
@@ -294,7 +294,7 @@ def get_deepmd_models(request):
     models = []
     
     if system_type:
-        model_dir = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}'
+        model_dir = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'model', system_type)
         try:
             for file in os.listdir(model_dir):
                 if file.endswith('.pb'):
@@ -316,16 +316,16 @@ def start_simulation(request):
             request.session['system_type'] = system_type
             
             # 确保输出目录存在
-            output_dir = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output'
+            output_dir = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output')
             os.makedirs(output_dir, exist_ok=True)
             
             # 获取选择的分子系统
             selected_system = request.POST.get('system', 'water.lmp')
-            system_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/md_sys/{selected_system}'
+            system_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'md_sys', selected_system)
             
             # 获取选择的系统类型和模型
             model = request.POST.get('deepmd_model')
-            model_path = f'/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/model/{system_type}/{model}'
+            model_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'model', system_type, model)
             
             # 获取系统对应的原子类型
             atom_types = SYSTEM_ATOM_TYPES.get(system_type, [''])
@@ -423,12 +423,12 @@ run             {request.POST.get('runsteps', '1000')}
 """
 
             # 保存输入文件
-            input_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/inLammps/in.lammps'
+            input_file = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'inLammps', 'in.lammps')
             with open(input_file, 'w') as f:
                 f.write(input_content)
             
             # 启动LAMMPS进程
-            lmp_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/lmp'
+            lmp_path = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'lmp')
             process = subprocess.Popen(
                 [lmp_path, '-in', input_file],
                 stdout=subprocess.PIPE,
@@ -436,7 +436,7 @@ run             {request.POST.get('runsteps', '1000')}
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
-                cwd='/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps'
+                cwd=os.path.join(settings.BASE_DIR, 'demo001', 'lammps')
             )
             
             # 存储进程信息
@@ -584,9 +584,9 @@ def get_simulation_data(request, data_type):
         
         # 确保文件存在且可读
         file_paths = {
-            'trajectory': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump',
-            'force': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump',
-            'rdf': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf'
+            'trajectory': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'Dump.dump'),
+            'force': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'force', 'Force.dump'),
+            'rdf': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'rdf', 'RDF.rdf')
         }
         
         if data_type not in file_paths:
@@ -697,9 +697,9 @@ def read_rdf_file(file_path, timestep=None, page=1, items_per_page=100):
 def download_data(request, data_type):
     """下载模拟数据文件"""
     file_paths = {
-        'trajectory': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump',
-        'force': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/force/Force.dump',
-        'rdf': '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/rdf/RDF.rdf'
+        'trajectory': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'Dump.dump'),
+        'force': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'Force.dump'),
+        'rdf': os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'RDF.rdf')
     }
     
     file_names = {
@@ -727,7 +727,7 @@ def visualization(request):
 
 def parse_lammps_log():
     """解析LAMMPS日志文件获取模拟参数"""
-    log_file = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/log.lammps'
+    log_file = os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'log.lammps')
     simulation_info = {
         'timestep': None,      # 时间步长
         'temperature': None,   # 模拟温度
@@ -815,7 +815,7 @@ def get_trajectory_data(request):
         timesteps = []
         current_timestep = None
         
-        with open('/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump', 'r') as f:
+        with open(os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'Dump.dump'), 'r') as f:
             for line in f:
                 if line.startswith('ITEM: TIMESTEP'):
                     if current_timestep:
@@ -851,7 +851,7 @@ def get_timestep_data(request):
         reading_atoms = False
         box_info_lines = 0  # 用于跟踪box信息行数
         
-        with open('/work/wangs/Django-deepmd/mysite_deepmd/demo001/lammps/output/dump/Dump.dump', 'r') as f:
+        with open(os.path.join(settings.BASE_DIR, 'demo001', 'lammps', 'output', 'dump', 'Dump.dump'), 'r') as f:
             for line in f:
                 if line.startswith('ITEM: TIMESTEP'):
                     current_timestep = int(next(f))
@@ -986,7 +986,7 @@ def generate_rdf(request):
                 }, status=400)
 
             # 运行RDF绘图脚本
-            script_path = '/work/wangs/Django-deepmd/mysite_deepmd/demo001/plugins/plot_rdf.py'
+            script_path = os.path.join(settings.BASE_DIR, 'demo001', 'plugins', 'plot_rdf.py')
             subprocess.run(['python', script_path], check=True)
             
             # 只返回用户选择的RDF类型对应的图片URL
