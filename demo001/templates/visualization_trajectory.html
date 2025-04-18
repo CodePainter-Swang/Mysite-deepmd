@@ -111,6 +111,16 @@
                        min="1" max="10" value="5" 
                        oninput="document.getElementById('speedValue').textContent=this.value">
             </div>
+
+            <div class="form-group form-group-slider">
+                <label>
+                    显示原子数量
+                    <span class="atoms-value"><span id="atomCountValue">{{ simulation_info.num_atoms|default:"192" }}</span> / {{ simulation_info.num_atoms|default:"192" }}</span>
+                </label>
+                <input type="range" id="atomCount" class="form-control-range" 
+                       min="1" max="{{ simulation_info.num_atoms|default:"192" }}" value="{{ simulation_info.num_atoms|default:"192" }}" 
+                       oninput="document.getElementById('atomCountValue').textContent=this.value">
+            </div>
         </div>
         
         <div id="visualization" class="visualization-content">
@@ -235,8 +245,11 @@
             atoms.forEach(atom => scene.remove(atom));
             atoms = [];
 
-            // 创建新的原子
-            atomsData.forEach(atom => {
+            // 获取用户设置的原子数量
+            const maxAtoms = parseInt(document.getElementById('atomCount').value);
+            
+            // 创建新的原子（限制显示数量）
+            atomsData.slice(0, maxAtoms).forEach(atom => {
                 const geometry = new THREE.SphereGeometry(0.5, 32, 32);
                 const material = new THREE.MeshPhongMaterial({
                     color: getAtomColor(atom.type)
@@ -383,6 +396,11 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth * 0.8, window.innerHeight * 0.8);
+            });
+
+            // 添加原子数量滑块事件
+            document.getElementById('atomCount').addEventListener('change', function() {
+                loadTimestepData(document.getElementById('timestep').value);
             });
         });
     </script>
